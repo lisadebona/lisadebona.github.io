@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordPress Email Setup Guide | Microsoft 365 SMTP & DKIM</title>
+    <!-- Tailwind CSS for modern responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for clean, legible UI icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .print-shadow-none {
+                box-shadow: none !important;
+                border: 1px solid #e5e7eb !important;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
+
+    <!-- Top Action Bar / Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 no-print">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-sm">
+                    <i class="fa-solid fa-envelope-circle-check"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-900 text-lg leading-tight">WordPress Email Integration Guide</h1>
+                    <p class="text-xs text-slate-500">Client Reference: Microsoft 365 SMTP & DKIM Setup</p>
+                </div>
+            </div>
+            <button onclick="window.print()" class="inline-flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors shadow-sm cursor-pointer">
+                <i class="fa-solid fa-print"></i>
+                <span>Print or Save PDF</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Guide Container -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- Banner Card -->
+        <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl print-shadow-none">
+            <div class="max-w-3xl">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-200 border border-blue-400/30 mb-4">
+                    <i class="fa-solid fa-shield-halved mr-1.5"></i> Authentication & Deliverability Standard
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-bold mb-3 leading-tight">Configuring Reliable WordPress Email Notifications</h2>
+                <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                    This reference document provides exact instructions for integrating your WordPress site with <strong>Microsoft 365 (Outlook)</strong> using SMTP and configuring <strong>DKIM authentication</strong> to guarantee optimal inbox delivery and prevent messages from landing in spam folders.
+                </p>
+            </div>
+        </div>
+
+        <!-- Quick Summary Box -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm print-shadow-none flex items-start space-x-4">
+                <div class="p-3 bg-blue-50 text-blue-600 rounded-lg shrink-0">
+                    <i class="fa-solid fa-server text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-slate-900 text-sm">Target Server</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">smtp.office365.com</p>
+                    <span class="inline-block mt-2 text-[11px] font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded">Port 587 (TLS)</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm print-shadow-none flex items-start space-x-4">
+                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg shrink-0">
+                    <i class="fa-solid fa-key text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-slate-900 text-sm">Authentication</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">M365 Account / App Password</p>
+                    <span class="inline-block mt-2 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">MFA Supported</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm print-shadow-none flex items-start space-x-4">
+                <div class="p-3 bg-amber-50 text-amber-600 rounded-lg shrink-0">
+                    <i class="fa-solid fa-certificate text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-slate-900 text-sm">Security Record</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Dual CNAME DKIM Keys</p>
+                    <span class="inline-block mt-2 text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded">DNS Level Verification</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 1: SMTP CONFIGURATION -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden print-shadow-none">
+            <div class="border-b border-slate-200 bg-slate-50/50 p-6">
+                <div class="flex items-center space-x-3">
+                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm">1</span>
+                    <h2 class="text-xl font-bold text-slate-900">Configure Microsoft 365 SMTP in WordPress</h2>
+                </div>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Log into your WordPress Dashboard, install an SMTP plugin (such as <strong>WP Mail SMTP</strong> or <strong>FluentSMTP</strong>), select <strong>Other SMTP</strong> as your mailer option, and enter the following settings:
+                </p>
+
+                <!-- Configuration Table / Reference -->
+                <div class="bg-slate-900 text-slate-200 rounded-xl p-5 font-mono text-sm shadow-inner space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between py-1.5 border-b border-slate-800">
+                        <span class="text-slate-400 text-xs uppercase font-sans">SMTP Host</span>
+                        <div class="flex items-center space-x-2 mt-1 sm:mt-0">
+                            <span class="text-blue-400 font-semibold">smtp.office365.com</span>
+                            <button onclick="copyToClipboard('smtp.office365.com', this)" class="no-print text-slate-400 hover:text-white text-xs bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded transition-colors">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between py-1.5 border-b border-slate-800">
+                        <span class="text-slate-400 text-xs uppercase font-sans">Encryption</span>
+                        <span class="text-emerald-400 font-semibold">TLS / STARTTLS</span>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between py-1.5 border-b border-slate-800">
+                        <span class="text-slate-400 text-xs uppercase font-sans">SMTP Port</span>
+                        <span class="text-amber-400 font-semibold">587</span>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between py-1.5 border-b border-slate-800">
+                        <span class="text-slate-400 text-xs uppercase font-sans">Authentication</span>
+                        <span class="text-purple-400 font-semibold">Enabled (ON)</span>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between py-1.5 border-b border-slate-800">
+                        <span class="text-slate-400 text-xs uppercase font-sans">SMTP Username</span>
+                        <span class="text-slate-300">your-email@yourdomain.com</span>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between py-1.5">
+                        <span class="text-slate-400 text-xs uppercase font-sans">SMTP Password</span>
+                        <span class="text-slate-300">Account Password OR App Password</span>
+                    </div>
+                </div>
+
+                <!-- Callout Box: MFA & App Password -->
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl">
+                    <div class="flex items-start space-x-3">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600 text-lg mt-0.5"></i>
+                        <div class="text-sm">
+                            <h4 class="font-semibold text-amber-900">Multi-Factor Authentication (MFA) Notice</h4>
+                            <p class="text-amber-800 mt-1 leading-relaxed">
+                                If your Microsoft 365 user account has Multi-Factor Authentication (MFA/2FA) enabled, standard passwords will be rejected. You must generate an <strong>App Password</strong> through your Microsoft Security Info dashboard (<strong>mysignins.microsoft.com</strong>) and paste it into the password field above.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Strict Sender Notice -->
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-xl">
+                    <div class="flex items-start space-x-3">
+                        <i class="fa-solid fa-circle-info text-blue-600 text-lg mt-0.5"></i>
+                        <div class="text-sm">
+                            <h4 class="font-semibold text-blue-900">Important: "From Email" Matching Rule</h4>
+                            <p class="text-blue-800 mt-1 leading-relaxed">
+                                Microsoft 365 forbids sender spoofing. The <strong>From Email</strong> address in your WordPress SMTP plugin settings <em>must exactly match</em> the Microsoft 365 mailbox username used for authentication. Check the box to <strong>Force From Email</strong> in the plugin settings.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: DKIM SETUP GUIDE -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden print-shadow-none page-break">
+            <div class="border-b border-slate-200 bg-slate-50/50 p-6">
+                <div class="flex items-center space-x-3">
+                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm">2</span>
+                    <h2 class="text-xl font-bold text-slate-900">Enable DKIM Signing in Microsoft 365</h2>
+                </div>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    DKIM adds a cryptographic digital signature to outgoing email. This proves to recipient inbox providers (like Gmail and Yahoo) that the email genuinely came from your company domain.
+                </p>
+
+                <!-- Steps for M365 Admin -->
+                <ol class="space-y-4 text-sm text-slate-700 list-decimal list-inside">
+                    <li class="pl-2">
+                        Log into the <strong><a href="https://security.microsoft.com/dkim" target="_blank" class="text-blue-600 underline font-medium">Microsoft Defender Portal</a></strong> using your administrator credentials.
+                    </li>
+                    <li class="pl-2">
+                        Navigate to <strong>Email & Collaboration</strong> &gt; <strong>Policies & Rules</strong> &gt; <strong>Threat Policies</strong> &gt; <strong>DomainKeys Identified Mail (DKIM)</strong>.
+                    </li>
+                    <li class="pl-2">
+                        Select your domain name from the list and toggle DKIM to <strong>Enabled</strong>.
+                    </li>
+                    <li class="pl-2">
+                        Microsoft will display two CNAME DNS records that must be added to your domain registrar.
+                    </li>
+                </ol>
+
+                <!-- DNS Record Table -->
+                <div class="mt-4">
+                    <h3 class="text-sm font-semibold text-slate-900 mb-3 flex items-center">
+                        <i class="fa-solid fa-network-wired text-slate-500 mr-2"></i> Required DNS CNAME Records
+                    </h3>
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-100 text-slate-700 text-xs uppercase font-semibold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3">Type</th>
+                                    <th class="p-3">Host / Name</th>
+                                    <th class="p-3">Value / Target / Points To</th>
+                                    <th class="p-3 text-center no-print">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 font-mono text-xs text-slate-800">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold text-blue-600">CNAME</td>
+                                    <td class="p-3">selector1._domainkey</td>
+                                    <td class="p-3 break-all text-slate-600">selector1-[yourdomain-com]._domainkey.[yourdomain].onmicrosoft.com</td>
+                                    <td class="p-3 text-center no-print">
+                                        <button onclick="copyToClipboard('selector1._domainkey', this)" class="text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded transition-colors text-xs">
+                                            <i class="fa-regular fa-copy"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold text-blue-600">CNAME</td>
+                                    <td class="p-3">selector2._domainkey</td>
+                                    <td class="p-3 break-all text-slate-600">selector2-[yourdomain-com]._domainkey.[yourdomain].onmicrosoft.com</td>
+                                    <td class="p-3 text-center no-print">
+                                        <button onclick="copyToClipboard('selector2._domainkey', this)" class="text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded transition-colors text-xs">
+                                            <i class="fa-regular fa-copy"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">
+                        *Replace <code>[yourdomain-com]</code> with your domain name (replacing dots with hyphens) and <code>[yourdomain]</code> with your initial Microsoft 365 domain prefix as shown in your Defender dashboard.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: VERIFICATION CHECKLIST -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 print-shadow-none">
+            <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                <i class="fa-solid fa-list-check text-emerald-600 mr-2.5"></i> Deliverability Verification Checklist
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <label class="flex items-start space-x-3 p-3 rounded-lg border border-slate-200 bg-slate-50/50 cursor-pointer">
+                    <input type="checkbox" class="mt-1 rounded text-blue-600 focus:ring-blue-500">
+                    <span class="text-slate-700">Send test email from WP Mail SMTP plugin tools tab.</span>
+                </label>
+                <label class="flex items-start space-x-3 p-3 rounded-lg border border-slate-200 bg-slate-50/50 cursor-pointer">
+                    <input type="checkbox" class="mt-1 rounded text-blue-600 focus:ring-blue-500">
+                    <span class="text-slate-700">Confirm test email lands in recipient inbox (not spam).</span>
+                </label>
+                <label class="flex items-start space-x-3 p-3 rounded-lg border border-slate-200 bg-slate-50/50 cursor-pointer">
+                    <input type="checkbox" class="mt-1 rounded text-blue-600 focus:ring-blue-500">
+                    <span class="text-slate-700">Confirm DKIM status shows "Enabled" in Defender portal.</span>
+                </label>
+                <label class="flex items-start space-x-3 p-3 rounded-lg border border-slate-200 bg-slate-50/50 cursor-pointer">
+                    <input type="checkbox" class="mt-1 rounded text-blue-600 focus:ring-blue-500">
+                    <span class="text-slate-700">Check email headers to verify <code>dkim=pass</code>.</span>
+                </label>
+            </div>
+        </section>
+
+        <!-- Toast Notification for Copy Action -->
+        <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-xl flex items-center space-x-2 transform translate-y-20 opacity-0 transition-all duration-300 no-print">
+            <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+            <span id="toast-message">Copied to clipboard!</span>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-xs text-slate-500 border-t border-slate-200 mt-8">
+        <p>WordPress & Microsoft 365 Integration Reference • Prepared for Client Technical Deployment</p>
+    </footer>
+
+    <!-- Copy Script -->
+    <script>
+        function copyToClipboard(text, buttonElement) {
+            // Fallback execCommand for iframe compatibility
+            const dummy = document.createElement('textarea');
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+
+            // Toast feedback
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = `Copied: "${text}"`;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
