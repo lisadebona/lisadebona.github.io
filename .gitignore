@@ -3,9 +3,15 @@
 # Ignore all directories called node_modules in current folder and any subfolders.
 node_modules/
 /node_modules/
-
 test/
+_test/
 /_test/
+bak/
+_bak/
+/_bak/
+backup/
+_backup/
+/_backup/
 
 # Packages #
 ############

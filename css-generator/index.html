@@ -1136,7 +1136,7 @@
                 if (this.useSCSS) {
                     codeBox.value = `$gradient-bg: ${gradStr};\n\n.my-element {\n  background: $gradient-bg;\n}`;
                 } else {
-                    codeBox.value = `/* Fallback for older browsers */\nbackground: ${this.colorStops[0].color};\n\n/* Modern Gradient */\nbackground: ${gradStr};`;
+                    codeBox.value = `background: ${this.colorStops[0].color};\nbackground: ${gradStr};`;
                 }
             }
         }
@@ -1148,6 +1148,7 @@
         class ShapesGenerator {
             constructor() {
                 this.shapes = {
+                    // Standard Triangles
                     'triangle-up': {
                         title: 'Triangle Up',
                         params: { width: 100, color: '#6366f1' },
@@ -1159,6 +1160,82 @@
                         params: { width: 100, color: '#6366f1' },
                         render: (p) => `<div style="width: 0; height: 0; border-left: ${p.width/2}px solid transparent; border-right: ${p.width/2}px solid transparent; border-top: ${p.width}px solid ${p.color};"></div>`,
                         css: (p) => `width: 0;\nheight: 0;\nborder-left: ${p.width/2}px solid transparent;\nborder-right: ${p.width/2}px solid transparent;\nborder-top: ${p.width}px solid ${p.color};`
+                    },
+                    'triangle-left': {
+                        title: 'Triangle Left',
+                        params: { width: 100, color: '#6366f1' },
+                        render: (p) => `<div style="width: 0; height: 0; border-top: ${p.width/2}px solid transparent; border-bottom: ${p.width/2}px solid transparent; border-right: ${p.width}px solid ${p.color};"></div>`,
+                        css: (p) => `width: 0;\nheight: 0;\nborder-top: ${p.width/2}px solid transparent;\nborder-bottom: ${p.width/2}px solid transparent;\nborder-right: ${p.width}px solid ${p.color};`
+                    },
+                    'triangle-right': {
+                        title: 'Triangle Right',
+                        params: { width: 100, color: '#6366f1' },
+                        render: (p) => `<div style="width: 0; height: 0; border-top: ${p.width/2}px solid transparent; border-bottom: ${p.width/2}px solid transparent; border-left: ${p.width}px solid ${p.color};"></div>`,
+                        css: (p) => `width: 0;\nheight: 0;\nborder-top: ${p.width/2}px solid transparent;\nborder-bottom: ${p.width/2}px solid transparent;\nborder-left: ${p.width}px solid ${p.color};`
+                    },
+
+                    // Corner Triangles
+                    'triangle-top-left': {
+                        title: 'Triangle Top-Left',
+                        params: { width: 100, color: '#0000ff' },
+                        render: (p) => `<div style="width: 0; height: 0; border-top: ${p.width}px solid ${p.color}; border-right: ${p.width}px solid transparent;"></div>`,
+                        css: (p) => `width: 0;\nheight: 0;\nborder-top: ${p.width}px solid ${p.color};\nborder-right: ${p.width}px solid transparent;`
+                    },
+                    'triangle-top-right': {
+                        title: 'Triangle Top-Right',
+                        params: { width: 100, color: '#0000ff' },
+                        render: (p) => `<div style="width: 0; height: 0; border-top: ${p.width}px solid ${p.color}; border-left: ${p.width}px solid transparent;"></div>`,
+                        css: (p) => `width: 0;\nheight: 0;\nborder-top: ${p.width}px solid ${p.color};\nborder-left: ${p.width}px solid transparent;`
+                    },
+                    'triangle-bottom-left': {
+                        title: 'Triangle Bottom-Left',
+                        params: { width: 100, color: '#0000ff' },
+                        render: (p) => `<div style="width: 0; height: 0; border-bottom: ${p.width}px solid ${p.color}; border-right: ${p.width}px solid transparent;"></div>`,
+                        css: (p) => `width: 0;\nheight: 0;\nborder-bottom: ${p.width}px solid ${p.color};\nborder-right: ${p.width}px solid transparent;`
+                    },
+                    'triangle-bottom-right': {
+                        title: 'Triangle Bottom-Right',
+                        params: { width: 100, color: '#0000ff' },
+                        render: (p) => `<div style="width: 0; height: 0; border-bottom: ${p.width}px solid ${p.color}; border-left: ${p.width}px solid transparent;"></div>`,
+                        css: (p) => `width: 0;\nheight: 0;\nborder-bottom: ${p.width}px solid ${p.color};\nborder-left: ${p.width}px solid transparent;`
+                    },
+
+                    // Additional CSS Shapes
+                    'square': {
+                        title: 'Square',
+                        params: { size: 100, color: '#6366f1' },
+                        render: (p) => `<div style="width: ${p.size}px; height: ${p.size}px; background: ${p.color};"></div>`,
+                        css: (p) => `width: ${p.size}px;\nheight: ${p.size}px;\nbackground: ${p.color};`
+                    },
+                    'rectangle': {
+                        title: 'Rectangle',
+                        params: { width: 150, height: 90, color: '#6366f1' },
+                        render: (p) => `<div style="width: ${p.width}px; height: ${p.height}px; background: ${p.color};"></div>`,
+                        css: (p) => `width: ${p.width}px;\nheight: ${p.height}px;\nbackground: ${p.color};`
+                    },
+                    'circle': {
+                        title: 'Circle',
+                        params: { size: 100, color: '#10b981' },
+                        render: (p) => `<div style="width: ${p.size}px; height: ${p.size}px; background: ${p.color}; border-radius: 50%;"></div>`,
+                        css: (p) => `width: ${p.size}px;\nheight: ${p.size}px;\nbackground: ${p.color};\nborder-radius: 50%;`
+                    },
+                    'oval': {
+                        title: 'Oval',
+                        params: { width: 140, height: 90, color: '#10b981' },
+                        render: (p) => `<div style="width: ${p.width}px; height: ${p.height}px; background: ${p.color}; border-radius: 50%;"></div>`,
+                        css: (p) => `width: ${p.width}px;\nheight: ${p.height}px;\nbackground: ${p.color};\nborder-radius: 50%;`
+                    },
+                    'egg': {
+                        title: 'Egg',
+                        params: { width: 90, height: 130, color: '#f59e0b' },
+                        render: (p) => `<div style="width: ${p.width}px; height: ${p.height}px; background: ${p.color}; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;"></div>`,
+                        css: (p) => `width: ${p.width}px;\nheight: ${p.height}px;\nbackground: ${p.color};\nborder-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;`
+                    },
+                    'diamond': {
+                        title: 'Diamond',
+                        params: { size: 90, color: '#06b6d4' },
+                        render: (p) => `<div style="width: ${p.size}px; height: ${p.size}px; background: ${p.color}; transform: rotate(45deg);"></div>`,
+                        css: (p) => `width: ${p.size}px;\nheight: ${p.size}px;\nbackground: ${p.color};\ntransform: rotate(45deg);`
                     },
                     'trapezoid': {
                         title: 'Trapezoid',
@@ -1172,23 +1249,47 @@
                         render: (p) => `<div style="width: ${p.width}px; height: ${p.height}px; transform: skew(${p.skew}deg); background: ${p.color};"></div>`,
                         css: (p) => `width: ${p.width}px;\nheight: ${p.height}px;\ntransform: skew(${p.skew}deg);\nbackground: ${p.color};`
                     },
+                    'chevron': {
+                        title: 'Chevron',
+                        params: { width: 140, height: 80, color: '#8b5cf6' },
+                        render: (p) => `<div style="width: ${p.width}px; height: ${p.height}px; background: ${p.color}; clip-path: polygon(100% 0%, 75% 50%, 100% 100%, 25% 100%, 0% 50%, 25% 0%);"></div>`,
+                        css: (p) => `width: ${p.width}px;\nheight: ${p.height}px;\nbackground: ${p.color};\nclip-path: polygon(100% 0%, 75% 50%, 100% 100%, 25% 100%, 0% 50%, 25% 0%);`
+                    },
+                    'hexagon': {
+                        title: 'Hexagon',
+                        params: { width: 120, height: 104, color: '#a855f7' },
+                        render: (p) => `<div style="width: ${p.width}px; height: ${p.height}px; background: ${p.color}; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);"></div>`,
+                        css: (p) => `width: ${p.width}px;\nheight: ${p.height}px;\nbackground: ${p.color};\nclip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);`
+                    },
+                    'octagon': {
+                        title: 'Octagon',
+                        params: { size: 110, color: '#ef4444' },
+                        render: (p) => `<div style="width: ${p.size}px; height: ${p.size}px; background: ${p.color}; clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);"></div>`,
+                        css: (p) => `width: ${p.size}px;\nheight: ${p.size}px;\nbackground: ${p.color};\nclip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);`
+                    },
                     'star-6': {
                         title: '6-Point Star',
                         params: { size: 100, color: '#eab308' },
                         render: (p) => `<div style="position: relative; width: 0; height: 0; border-left: ${p.size/2}px solid transparent; border-right: ${p.size/2}px solid transparent; border-bottom: ${p.size}px solid ${p.color};"><div style="position: absolute; top: ${p.size/3}px; left: -${p.size/2}px; width: 0; height: 0; border-left: ${p.size/2}px solid transparent; border-right: ${p.size/2}px solid transparent; border-top: ${p.size}px solid ${p.color};"></div></div>`,
                         css: (p) => `.star-6 {\n  width: 0;\n  height: 0;\n  border-left: ${p.size/2}px solid transparent;\n  border-right: ${p.size/2}px solid transparent;\n  border-bottom: ${p.size}px solid ${p.color};\n  position: relative;\n}\n.star-6::after {\n  content: "";\n  position: absolute;\n  top: ${p.size/3}px;\n  left: -${p.size/2}px;\n  width: 0;\n  height: 0;\n  border-left: ${p.size/2}px solid transparent;\n  border-right: ${p.size/2}px solid transparent;\n  border-top: ${p.size}px solid ${p.color};\n}`
                     },
+                    'heart': {
+                        title: 'Heart',
+                        params: { size: 100, color: '#ec4899' },
+                        render: (p) => `<div style="width: ${p.size}px; height: ${p.size}px; background: ${p.color}; clip-path: polygon(50% 15%, 65% 0, 85% 0, 100% 20%, 100% 45%, 50% 95%, 0 45%, 0 20%, 15% 0, 35% 0);"></div>`,
+                        css: (p) => `width: ${p.size}px;\nheight: ${p.size}px;\nbackground: ${p.color};\nclip-path: polygon(50% 15%, 65% 0, 85% 0, 100% 20%, 100% 45%, 50% 95%, 0 45%, 0 20%, 15% 0, 35% 0);`
+                    },
+                    'crescent': {
+                        title: 'Crescent',
+                        params: { size: 100, color: '#38bdf8' },
+                        render: (p) => `<div style="width: ${p.size}px; height: ${p.size}px; background: transparent; border-radius: 50%; box-shadow: 20px 10px 0 0 ${p.color};"></div>`,
+                        css: (p) => `width: ${p.size}px;\nheight: ${p.size}px;\nbackground: transparent;\nborder-radius: 50%;\nbox-shadow: 20px 10px 0 0 ${p.color};`
+                    },
                     'speech-bubble': {
                         title: 'Speech Bubble',
                         params: { width: 160, height: 90, color: '#3b82f6', radius: 10 },
                         render: (p) => `<div style="width: ${p.width}px; height: ${p.height}px; background: ${p.color}; border-radius: ${p.radius}px; position: relative;"><div style="position: absolute; bottom: -12px; left: 20px; width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 12px solid ${p.color};"></div></div>`,
                         css: (p) => `.speech-bubble {\n  width: ${p.width}px;\n  height: ${p.height}px;\n  background: ${p.color};\n  border-radius: ${p.radius}px;\n  position: relative;\n}\n.speech-bubble::after {\n  content: "";\n  position: absolute;\n  bottom: -12px;\n  left: 20px;\n  border-left: 12px solid transparent;\n  border-right: 12px solid transparent;\n  border-top: 12px solid ${p.color};\n}`
-                    },
-                    'pacman': {
-                        title: 'Pac-Man',
-                        params: { size: 100, color: '#facc15' },
-                        render: (p) => `<div style="width: 0; height: 0; border-right: ${p.size/2}px solid transparent; border-top: ${p.size/2}px solid ${p.color}; border-left: ${p.size/2}px solid ${p.color}; border-bottom: ${p.size/2}px solid ${p.color}; border-radius: ${p.size/2}px;"></div>`,
-                        css: (p) => `width: 0;\nheight: 0;\nborder-right: ${p.size/2}px solid transparent;\nborder-top: ${p.size/2}px solid ${p.color};\nborder-left: ${p.size/2}px solid ${p.color};\nborder-bottom: ${p.size/2}px solid ${p.color};\nborder-radius: 50%;`
                     },
                     'badge': {
                         title: 'Ribbon Badge',
@@ -1198,7 +1299,7 @@
                     }
                 };
 
-                this.activeKey = 'triangle-up';
+                this.activeKey = 'triangle-top-right';
                 this.init();
             }
 
