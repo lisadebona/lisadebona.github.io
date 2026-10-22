@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Get Your Gmail API Refresh Token</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        google: {
+                            blue: '#1a73e8',
+                            blueHover: '#1557b0',
+                            darkBg: '#0f172a',
+                            cardDark: '#1e293b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200 min-h-screen flex flex-col">
+
+    <!-- Sticky Navigation Bar -->
+    <header class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 print:hidden">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-google-blue flex items-center justify-center text-white font-bold shadow-md shadow-blue-500/20">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-900 dark:text-white leading-tight">Gmail API Token Guide</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Client Integration Manual</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <!-- Dark Mode Toggle -->
+                <button id="themeToggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Toggle Theme">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:block text-amber-400"></i>
+                </button>
+                
+                <!-- Print Button -->
+                <button onclick="window.print()" class="px-3 py-2 text-xs sm:text-sm font-medium rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i>
+                    <span class="hidden sm:inline">Print / Save PDF</span>
+                </button>
+            </div>
+        </div>
+        <!-- Progress Bar Indicator -->
+        <div class="w-full bg-slate-200 dark:bg-slate-800 h-1">
+            <div id="topProgressBar" class="bg-google-blue h-1 w-0 transition-all duration-300"></div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Sidebar / Navigation Quick Links -->
+        <aside class="lg:col-span-3 space-y-6 print:hidden">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-sm sticky top-24">
+                <h3 class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">On This Page</h3>
+                <nav class="space-y-1 text-sm font-medium">
+                    <a href="#prerequisites" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-google-blue transition">
+                        <i class="fa-solid fa-list-check w-4 text-center"></i> Prerequisites
+                    </a>
+                    <a href="#step1" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-google-blue transition">
+                        <i class="fa-solid fa-cloud w-4 text-center"></i> 1. Google Cloud Setup
+                    </a>
+                    <a href="#step2" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-google-blue transition">
+                        <i class="fa-solid fa-flask w-4 text-center"></i> 2. OAuth Playground
+                    </a>
+                    <a href="#step3" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-google-blue transition">
+                        <i class="fa-solid fa-sliders w-4 text-center"></i> 3. Environment Helper
+                    </a>
+                    <a href="#security" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-google-blue transition">
+                        <i class="fa-solid fa-shield-halved w-4 text-center"></i> Security & Best Practices
+                    </a>
+                    <a href="#troubleshooting" class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-google-blue transition">
+                        <i class="fa-solid fa-circle-question w-4 text-center"></i> Troubleshooting
+                    </a>
+                </nav>
+
+                <hr class="my-4 border-slate-200 dark:border-slate-700">
+
+                <!-- Overall Progress Tracker -->
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1">
+                        <span class="text-slate-600 dark:text-slate-400">Step Checklist</span>
+                        <span id="progressPercent" class="text-google-blue">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                        <div id="checklistProgressBar" class="bg-google-blue h-2 rounded-full w-0 transition-all duration-300"></div>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-2"><span id="completedCount">0</span> of 8 tasks completed</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="lg:col-span-9 space-y-8">
+
+            <!-- Hero Banner -->
+            <section class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-blue-500/10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold backdrop-blur-md mb-4 border border-white/20">
+                    <i class="fa-solid fa-paper-plane text-blue-200"></i> Integration Guide
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-3">How to Obtain Your Gmail API Refresh Token</h2>
+                <p class="text-blue-100 text-sm sm:text-base leading-relaxed max-w-2xl">
+                    This step-by-step guide will help you quickly generate the required OAuth credentials (`Client ID`, `Client Secret`, and `Refresh Token`) so our mailer application can securely send emails on your behalf.
+                </p>
+            </section>
+
+            <!-- Prerequisites Section -->
+            <section id="prerequisites" class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-700/60 shadow-sm">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-google-blue"></i> Before You Begin
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700">
+                        <i class="fa-solid fa-envelope-open-text text-google-blue text-xl mt-1"></i>
+                        <div>
+                            <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Gmail or Workspace Account</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Access to the Google account that will send outgoing emails.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700">
+                        <i class="fa-solid fa-shield-cat text-google-blue text-xl mt-1"></i>
+                        <div>
+                            <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Google Cloud Console Access</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Ability to create or manage projects on Google Cloud.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 1: Google Cloud Console Setup -->
+            <section id="step1" class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-700/60 shadow-sm space-y-6">
+                <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
+                    <span class="text-xs font-bold uppercase tracking-wider text-google-blue bg-blue-50 dark:bg-blue-950/50 px-2.5 py-1 rounded-md border border-blue-200 dark:border-blue-800">Part 1</span>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mt-2">Create OAuth Credentials in Google Cloud Console</h3>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Task Item 1 -->
+                    <div class="flex items-start gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 transition">
+                        <input type="checkbox" id="task1" onchange="updateProgress()" class="mt-1 h-5 w-5 rounded border-slate-300 text-google-blue focus:ring-google-blue cursor-pointer">
+                        <label for="task1" class="cursor-pointer select-none space-y-2 text-sm">
+                            <span class="font-semibold text-slate-900 dark:text-white block">1.1 Create Project & Enable Gmail API</span>
+                            <p class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
+                                Go to the <a href="https://console.cloud.google.com/" target="_blank" class="text-google-blue underline hover:text-google-blueHover font-medium">Google Cloud Console</a>. Create a new project (e.g. "<em>Mailer-Integration</em>"). Then navigate to <strong>APIs & Services</strong> &gt; <strong>Library</strong>, search for <strong>Gmail API</strong>, and click <strong>Enable</strong>.
+                            </p>
+                        </label>
+                    </div>
+
+                    <!-- Task Item 2 -->
+                    <div class="flex items-start gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 transition">
+                        <input type="checkbox" id="task2" onchange="updateProgress()" class="mt-1 h-5 w-5 rounded border-slate-300 text-google-blue focus:ring-google-blue cursor-pointer">
+                        <label for="task2" class="cursor-pointer select-none space-y-2 text-sm">
+                            <span class="font-semibold text-slate-900 dark:text-white block">1.2 Configure OAuth Consent Screen</span>
+                            <p class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
+                                Navigate to <strong>APIs & Services</strong> &gt; <strong>OAuth consent screen</strong>.
+                            </p>
+                            <ul class="list-disc pl-5 text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                                <li class="relative">
+                                    Select User Type: <strong>External</strong> (or Internal if using Google Workspace).
+                                    <span class="inline-block ml-1 text-slate-400 cursor-help" title="OAuth Consent Screen: The approval prompt shown to users when logging in with Google."><i class="fa-regular fa-circle-question"></i></span>
+                                </li>
+                                <li>Fill in App Name, User Support Email, and Developer Contact Email.</li>
+                                <li>Under <strong>Test Users</strong>, click <strong>Add Users</strong> and add the exact Gmail address that will send emails!</li>
+                            </ul>
+                        </label>
+                    </div>
+
+                    <!-- Warning Callout Box -->
+                    <div class="bg-amber-50 dark:bg-amber-950/40 border-l-4 border-amber-500 p-4 rounded-r-xl text-amber-900 dark:text-amber-200 text-xs sm:text-sm space-y-1">
+                        <div class="flex items-center gap-2 font-bold text-amber-700 dark:text-amber-400">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Crucial Warning on Test Status
+                        </div>
+                        <p>
+                            If your app is in <strong>"Testing"</strong> publishing status, Google automatically expires refresh tokens after <strong>7 days</strong>. To make your token permanent, either set your project status to "In Production" or use a Google Workspace domain.
+                        </p>
+                    </div>
+
+                    <!-- Task Item 3 -->
+                    <div class="flex items-start gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 transition">
+                        <input type="checkbox" id="task3" onchange="updateProgress()" class="mt-1 h-5 w-5 rounded border-slate-300 text-google-blue focus:ring-google-blue cursor-pointer">
+                        <div class="space-y-2 text-sm w-full">
+                            <label for="task3" class="font-semibold text-slate-900 dark:text-white block cursor-pointer select-none">
+                                1.3 Create OAuth Client ID & Add Authorized Redirect URI
+                            </label>
+                            <p class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
+                                Go to <strong>Credentials</strong> &gt; <strong>Create Credentials</strong> &gt; <strong>OAuth client ID</strong>.
+                            </p>
+                            <ul class="list-disc pl-5 text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                                <li>Application type: Choose <strong>Web application</strong>.</li>
+                                <li>Under <strong>Authorized redirect URIs</strong>, click <strong>Add URI</strong> and paste the following exact URL:</li>
+                            </ul>
+
+                            <!-- Copyable Snippet Block -->
+                            <div class="mt-2 flex items-center justify-between bg-slate-100 dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 font-mono text-xs">
+                                <span class="text-google-blue dark:text-blue-400 truncate mr-2" id="redirectUriText">https://developers.google.com/oauthplayground</span>
+                                <button onclick="copyToClipboard('redirectUriText', this)" class="px-2.5 py-1 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition text-slate-700 dark:text-slate-200 shrink-0">
+                                    <i class="fa-regular fa-copy mr-1"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Task Item 4 -->
+                    <div class="flex items-start gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 transition">
+                        <input type="checkbox" id="task4" onchange="updateProgress()" class="mt-1 h-5 w-5 rounded border-slate-300 text-google-blue focus:ring-google-blue cursor-pointer">
+                        <label for="task4" class="cursor-pointer select-none space-y-2 text-sm">
+                            <span class="font-semibold text-slate-900 dark:text-white block">1.4 Copy Client ID and Client Secret</span>
+                            <p class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
+                                After clicking <strong>Create</strong>, a pop-up window will show your <strong>Client ID</strong> and <strong>Client Secret</strong>. Keep this tab open or paste them temporarily into a text document.
+                            </p>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 2: Google OAuth 2.0 Playground -->
+            <section id="step2" class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-700/60 shadow-sm space-y-6">
+                <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
+                    <span class="text-xs font-bold uppercase tracking-wider text-google-blue bg-blue-50 dark:bg-blue-950/50 px-2.5 py-1 rounded-md border border-blue-200 dark:border-blue-800">Part 2</span>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mt-2">Generate Refresh Token via OAuth Playground</h3>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Task Item 5 -->
+                    <div class="flex items-start gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 transition">
+                        <input type="checkbox" id="task5" onchange="updateProgress()" class="mt-1 h-5 w-5 rounded border-slate-300 text-google-blue focus:ring-google-blue cursor-pointer">
+                        <label for="task5" class="cursor-pointer select-none space-y-2 text-sm">
+                            <span class="font-semibold text-slate-900 dark:text-white block">2.1 Open OAuth Playground & Enter Custom Credentials</span>
+                            <p class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
+                                Open the <a href="https://developers.google.com/oauthplayground" target="_blank" class="text-google-blue underline hover:text-google-blueHover font-medium">Google OAuth 2.0 Playground</a>.
+                            </p>
+                            <ol class="list-decimal pl-5 text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                                <li>Click the <strong>Gear icon <i class="fa-solid fa-gear text-slate-400"></i></strong> in the top-right corner.</li>
+                                <li>Check the box for <strong>"Use your own OAuth credentials"</strong>.</li>
+                                <li>Paste your <strong>OAuth Client ID</strong> and <strong>OAuth Client Secret</strong> into their respective fields.</li>
+                                <li>Close the settings panel.</li>
+                            </ol>
+                        </label>
+                    </div>
+
+                    <!-- Task Item 6 -->
+                    <div class="flex items-start gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 transition">
+                        <input type="checkbox" id="task6" onchange="updateProgress()" class="mt-1 h-5 w-5 rounded border-slate-300 text-google-blue focus:ring-google-blue cursor-pointer">
+                        <div class="space-y-2 text-sm w-full">
+                            <label for="task6" class="font-semibold text-slate-900 dark:text-white block cursor-pointer select-none">
+                                2.2 Select Gmail API Scopes & Authorize
+                            </label>
+                            <p class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
+                                On the left menu, scroll down to <strong>Gmail API v1</strong>. Expand it and select the required scope:
+                            </p>
+                            <div class="mt-2 flex items-center justify-between bg-slate-100 dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 font-mono text-xs">
+                                <span class="text-google-blue dark:text-blue-400 truncate mr-2" id="scopeUriText">https://www.googleapis.com/auth/gmail.send</span>
+                                <button onclick="copyToClipboard('scopeUriText', this)" class="px-2.5 py-1 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition text-slate-700 dark:text-slate-200 shrink-0">
+                                    <i class="fa-regular fa-copy mr-1"></i> Copy
+                                </button>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                                Click the blue <strong>Authorize APIs</strong> button. Log in with your target Gmail user and click <strong>Allow</strong> (If prompted with "Google hasn't verified this app", click <em>Advanced &gt; Go to App (unsafe)</em> to proceed).
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Task Item 7 -->
+                    <div class="flex items-start gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 transition">
+                        <input type="checkbox" id="task7" onchange="updateProgress()" class="mt-1 h-5 w-5 rounded border-slate-300 text-google-blue focus:ring-google-blue cursor-pointer">
+                        <label for="task7" class="cursor-pointer select-none space-y-2 text-sm">
+                            <span class="font-semibold text-slate-900 dark:text-white block">2.3 Exchange Authorization Code for Tokens</span>
+                            <p class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
+                                You will be redirected back to Step 2 on the OAuth Playground screen. Click the blue <strong>Exchange authorization code for tokens</strong> button.
+                            </p>
+                        </label>
+                    </div>
+
+                    <!-- Task Item 8 -->
+                    <div class="flex items-start gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 transition">
+                        <input type="checkbox" id="task8" onchange="updateProgress()" class="mt-1 h-5 w-5 rounded border-slate-300 text-google-blue focus:ring-google-blue cursor-pointer">
+                        <label for="task8" class="cursor-pointer select-none space-y-2 text-sm">
+                            <span class="font-semibold text-slate-900 dark:text-white block">2.4 Copy Your Refresh Token</span>
+                            <p class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
+                                In the request/response box on the right, look for <strong>"refresh_token": "1//..."</strong>. Copy this value!
+                            </p>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 3: Interactive Credential Helper & .env Generator -->
+            <section id="step3" class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-700/60 shadow-sm space-y-6">
+                <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
+                    <span class="text-xs font-bold uppercase tracking-wider text-google-blue bg-blue-50 dark:bg-blue-950/50 px-2.5 py-1 rounded-md border border-blue-200 dark:border-blue-800">Part 3</span>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mt-2">Interactive Credential Configurator</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Paste your tokens below to automatically format your configuration file. <strong class="text-emerald-600 dark:text-emerald-400">All data stays local in your browser.</strong></p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Form Input Fields -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Gmail User Email</label>
+                            <input type="email" id="inputEmail" placeholder="user@example.com" oninput="generateEnvSnippet()" class="w-full text-xs p-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-google-blue focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Client ID</label>
+                            <input type="text" id="inputClientId" placeholder="123456789...apps.googleusercontent.com" oninput="generateEnvSnippet()" class="w-full text-xs p-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-google-blue focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Client Secret</label>
+                            <input type="password" id="inputClientSecret" placeholder="GOCSPX-..." oninput="generateEnvSnippet()" class="w-full text-xs p-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-google-blue focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Refresh Token</label>
+                            <input type="password" id="inputRefreshToken" placeholder="1//04..." oninput="generateEnvSnippet()" class="w-full text-xs p-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-google-blue focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Live Output Snippet -->
+                    <div class="flex flex-col justify-between bg-slate-900 text-slate-100 rounded-xl p-4 border border-slate-800">
+                        <div>
+                            <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
+                                <span class="text-xs font-mono text-slate-400"><i class="fa-solid fa-file-code mr-1"></i> Generated .env Snippet</span>
+                                <button onclick="copyToClipboard('envOutput', this)" class="px-2 py-1 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-slate-300 transition">
+                                    <i class="fa-regular fa-copy mr-1"></i> Copy .env
+                                </button>
+                            </div>
+                            <pre id="envOutput" class="font-mono text-xs text-emerald-400 whitespace-pre-wrap break-all leading-relaxed">
+GMAIL_USER=user@example.com
+GMAIL_CLIENT_ID=your_client_id_here
+GMAIL_CLIENT_SECRET=your_client_secret_here
+GMAIL_REFRESH_TOKEN=your_refresh_token_here
+                            </pre>
+                        </div>
+                        
+                        <div class="mt-4 pt-3 border-t border-slate-800 flex justify-end">
+                            <button onclick="downloadEnvFile()" class="w-full py-2 bg-google-blue hover:bg-google-blueHover text-white text-xs font-semibold rounded-lg shadow transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-download"></i> Download .env File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Security & Expiration Best Practices -->
+            <section id="security" class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-700/60 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved text-google-blue"></i> Security Best Practices & Token Expiration
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-700/30 border border-slate-200 dark:border-slate-700 space-y-1">
+                        <h4 class="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-lock text-emerald-500"></i> Token Protection
+                        </h4>
+                        <p>Never check your `.env` file or Client Secret into public GitHub repositories. Keep these secret keys restricted only to authorized backend production environments.</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-700/30 border border-slate-200 dark:border-slate-700 space-y-1">
+                        <h4 class="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-amber-500"></i> Refresh Token Invalidation
+                        </h4>
+                        <p>Tokens will be automatically revoked if you change your Google Password, revoke app access under Google Security Settings, or leave testing mode inactive for 6 months.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Troubleshooting Section -->
+            <section id="troubleshooting" class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-700/60 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question text-google-blue"></i> Troubleshooting Common Issues
+                </h3>
+                <div class="space-y-3">
+                    <details class="group bg-slate-50 dark:bg-slate-700/30 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <summary class="font-semibold text-xs sm:text-sm text-slate-800 dark:text-slate-200 cursor-pointer flex justify-between items-center">
+                            <span>Error: "redirect_uri_mismatch"</span>
+                            <i class="fa-solid fa-chevron-down text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-2 pl-1 leading-relaxed">
+                            Ensure `https://developers.google.com/oauthplayground` was added exactly under <strong>Authorized Redirect URIs</strong> inside your Google Cloud Console OAuth Client settings (make sure there are no trailing slashes or spaces).
+                        </p>
+                    </details>
+
+                    <details class="group bg-slate-50 dark:bg-slate-700/30 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <summary class="font-semibold text-xs sm:text-sm text-slate-800 dark:text-slate-200 cursor-pointer flex justify-between items-center">
+                            <span>Error: "403 Access Denied / Access blocked: App has not completed the Google verification process"</span>
+                            <i class="fa-solid fa-chevron-down text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-2 pl-1 leading-relaxed">
+                            Make sure you added the target email address under <strong>OAuth Consent Screen &gt; Test Users</strong>. If logging in with that account, click <em>Advanced &gt; Go to App (unsafe)</em> on the consent popup.
+                        </p>
+                    </details>
+
+                    <details class="group bg-slate-50 dark:bg-slate-700/30 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <summary class="font-semibold text-xs sm:text-sm text-slate-800 dark:text-slate-200 cursor-pointer flex justify-between items-center">
+                            <span>Refresh token stops working after 7 days</span>
+                            <i class="fa-solid fa-chevron-down text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-2 pl-1 leading-relaxed">
+                            Your Google Cloud Project is set to "Testing" mode. Change status to "In Production" on the OAuth Consent Screen page or use a Google Workspace domain account.
+                        </p>
+                    </details>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 mt-12 print:hidden">
+        <div class="max-w-6xl mx-auto px-4 text-center text-xs text-slate-500 dark:text-slate-400 space-y-1">
+            <p>Gmail API Integration Guide &bull; Client Setup Portal</p>
+            <p class="text-[11px] text-slate-400">All data entered into local helper fields remains confidential and is processed strictly inside your browser.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Dark Mode Toggle Logic
+        const themeToggleBtn = document.getElementById('themeToggle');
+        
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Copy to Clipboard Utility
+        function copyToClipboard(elementId, button) {
+            const el = document.getElementById(elementId);
+            const text = el.innerText || el.value;
+            
+            // Clipboard API replacement fallback for iFrame compatibility
+            const tempInput = document.createElement("textarea");
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            // Visual Feedback
+            const originalHTML = button.innerHTML;
+            button.innerHTML = `<i class="fa-solid fa-check text-emerald-500 mr-1"></i> Copied!`;
+            button.classList.add('border-emerald-500');
+            
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.classList.remove('border-emerald-500');
+            }, 2000);
+        }
+
+        // Progress Tracker Logic
+        function updateProgress() {
+            const totalTasks = 8;
+            let checkedTasks = 0;
+
+            for (let i = 1; i <= totalTasks; i++) {
+                const cb = document.getElementById(`task${i}`);
+                if (cb && cb.checked) {
+                    checkedTasks++;
+                }
+            }
+
+            const percentage = Math.round((checkedTasks / totalTasks) * 100);
+            
+            document.getElementById('checklistProgressBar').style.width = `${percentage}%`;
+            document.getElementById('topProgressBar').style.width = `${percentage}%`;
+            document.getElementById('progressPercent').innerText = `${percentage}%`;
+            document.getElementById('completedCount').innerText = checkedTasks;
+        }
+
+        // Live .env Snippet Generator
+        function generateEnvSnippet() {
+            const email = document.getElementById('inputEmail').value.trim() || 'user@example.com';
+            const clientId = document.getElementById('inputClientId').value.trim() || 'your_client_id_here';
+            const clientSecret = document.getElementById('inputClientSecret').value.trim() || 'your_client_secret_here';
+            const refreshToken = document.getElementById('inputRefreshToken').value.trim() || 'your_refresh_token_here';
+
+            const output = `GMAIL_USER=${email}\nGMAIL_CLIENT_ID=${clientId}\nGMAIL_CLIENT_SECRET=${clientSecret}\nGMAIL_REFRESH_TOKEN=${refreshToken}`;
+            
+            document.getElementById('envOutput').innerText = output;
+        }
+
+        // Download .env File Trigger
+        function downloadEnvFile() {
+            const content = document.getElementById('envOutput').innerText;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '.env';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

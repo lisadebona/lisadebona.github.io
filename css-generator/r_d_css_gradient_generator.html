@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>R&D CSS Gradient Generator</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            rd: {
+              900: '#0B0F19',
+              800: '#111827',
+              700: '#1F2937',
+              600: '#374151',
+              accent: '#6366F1',
+              accentHover: '#4F46E5',
+              cyan: '#06B6D4',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Transparency Checkerboard */
+    .checkerboard {
+      background-color: #1f2937;
+      background-image: 
+        linear-gradient(45deg, #111827 25%, transparent 25%), 
+        linear-gradient(-45deg, #111827 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #111827 75%), 
+        linear-gradient(-45deg, transparent 75%, #111827 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+    }
+
+    /* Custom Stop Handles */
+    .stop-handle {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 18px;
+      height: 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      transition: border-color 0.15s, transform 0.1s;
+      z-index: 10;
+    }
+    
+    .stop-handle.active {
+      transform: translate(-50%, -50%) scale(1.15);
+      z-index: 20;
+      border-color: #6366F1 !important;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Custom Slider Range */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: #6366F1;
+      cursor: pointer;
+      margin-top: -6px;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 4px;
+      cursor: pointer;
+      background: #374151;
+      border-radius: 2px;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #111827;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #4B5563;
+    }
+  </style>
+</head>
+<body class="bg-rd-900 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header Section -->
+  <header class="border-b border-slate-800 bg-rd-800/80 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <i class="fa-solid fa-flask text-white text-sm"></i>
+        </div>
+        <div>
+          <span class="text-xs uppercase tracking-widest font-semibold text-indigo-400">R&D Hub</span>
+          <h1 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+            CSS Gradient Studio <span class="bg-indigo-500/10 text-indigo-400 text-[10px] px-2 py-0.5 rounded-full border border-indigo-500/20 font-mono">v2.4</span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- Header Quick Actions -->
+      <div class="flex items-center space-x-3">
+        <button id="randomizeBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 hover:text-white border border-slate-700 transition">
+          <i class="fa-solid fa-dice text-indigo-400"></i>
+          <span>Randomize</span>
+        </button>
+        <button id="copyCssHeaderBtn" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow-lg shadow-indigo-600/30 transition">
+          <i class="fa-regular fa-copy"></i>
+          <span>Copy CSS</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left Column: Canvas, Preview, & Main Controls (8 Cols) -->
+    <div class="lg:col-span-7 xl:col-span-8 flex flex-col space-y-6">
+
+      <!-- Live Gradient Preview Display -->
+      <div class="bg-rd-800 rounded-2xl border border-slate-800 p-4 shadow-xl flex flex-col">
+        <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800/80">
+          <div class="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <i class="fa-solid fa-display text-indigo-400"></i>
+            <span>Viewport Preview</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <!-- Checkerboard Toggle -->
+            <button id="toggleCheckerboard" title="Toggle Transparency Grid" class="px-2.5 py-1 rounded-md text-xs bg-slate-900/60 hover:bg-slate-900 border border-slate-700 text-slate-300 transition flex items-center gap-1.5">
+              <i class="fa-solid fa-border-all text-xs"></i>
+              <span class="hidden sm:inline">Grid</span>
+            </button>
+            <!-- Aspect Ratio / Size Mockups -->
+            <div class="flex bg-slate-900/60 p-0.5 rounded-md border border-slate-800">
+              <button data-aspect="banner" class="aspect-btn px-2 py-0.5 text-[11px] rounded font-medium text-slate-400 hover:text-white transition">Banner</button>
+              <button data-aspect="card" class="aspect-btn px-2 py-0.5 text-[11px] rounded font-medium text-white bg-slate-800 shadow transition">Card</button>
+              <button data-aspect="circle" class="aspect-btn px-2 py-0.5 text-[11px] rounded font-medium text-slate-400 hover:text-white transition">Circle</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual Preview Canvas Holder -->
+        <div class="relative w-full h-72 sm:h-80 rounded-xl overflow-hidden checkerboard transition-all duration-300 flex items-center justify-center group" id="previewContainer">
+          <div id="gradientPreview" class="w-full h-full transition-all duration-150 relative"></div>
+          
+          <!-- Quick Overlay Specs -->
+          <div class="absolute bottom-3 right-3 px-3 py-1.5 bg-rd-900/80 backdrop-blur-md border border-slate-700/50 rounded-lg text-[11px] font-mono text-slate-300 pointer-events-none opacity-0 group-hover:opacity-100 transition">
+            <span id="overlaySpecText">linear-gradient(90deg, ...)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Multi-Stop Gradient Slider Bar Component -->
+      <div class="bg-rd-800 rounded-2xl border border-slate-800 p-5 shadow-xl space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-indigo-400"></i>
+            <span>Interactive Color Stops</span>
+          </h2>
+          <span class="text-xs text-slate-400">Click bar to add stop • Drag to adjust position</span>
+        </div>
+
+        <!-- Interactive Color Bar Container -->
+        <div class="py-2 px-1">
+          <div id="colorBarTrack" class="relative h-10 w-full rounded-lg cursor-pointer checkerboard border border-slate-700/80 shadow-inner select-none">
+            <!-- Simulated Gradient Overlay -->
+            <div id="colorBarGradient" class="absolute inset-0 rounded-lg pointer-events-none"></div>
+            <!-- Dynamic Handles inserted here via JavaScript -->
+          </div>
+        </div>
+
+        <!-- Selected Stop Controls Bar -->
+        <div id="stopControlsCard" class="bg-slate-900/80 rounded-xl p-3.5 border border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <!-- Color Picker & Hex -->
+          <div class="flex items-center space-x-3">
+            <label class="font-medium text-slate-400">Color:</label>
+            <div class="flex items-center space-x-2">
+              <input type="color" id="stopColorPicker" class="w-8 h-8 rounded-lg bg-transparent border border-slate-700 cursor-pointer p-0.5">
+              <input type="text" id="stopColorHex" class="w-20 px-2 py-1 bg-slate-800 border border-slate-700 rounded-md text-mono font-medium text-slate-200 focus:outline-none focus:border-indigo-500 uppercase">
+            </div>
+          </div>
+
+          <!-- Position Slider -->
+          <div class="flex items-center space-x-3">
+            <label class="font-medium text-slate-400">Position:</label>
+            <div class="flex items-center space-x-2">
+              <input type="range" id="stopPositionRange" min="0" max="100" class="w-24 sm:w-28">
+              <span id="stopPositionVal" class="font-mono text-slate-200 w-8 text-right">0%</span>
+            </div>
+          </div>
+
+          <!-- Opacity Slider -->
+          <div class="flex items-center space-x-3">
+            <label class="font-medium text-slate-400">Opacity:</label>
+            <div class="flex items-center space-x-2">
+              <input type="range" id="stopOpacityRange" min="0" max="100" class="w-20 sm:w-24">
+              <span id="stopOpacityVal" class="font-mono text-slate-200 w-9 text-right">100%</span>
+            </div>
+          </div>
+
+          <!-- Delete Stop Button -->
+          <button id="deleteStopBtn" class="px-2.5 py-1 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 hover:text-red-300 rounded-md font-medium transition flex items-center gap-1.5 ml-auto">
+            <i class="fa-solid fa-trash-can text-xs"></i>
+            <span>Delete</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- CSS Code Generator & Export Options -->
+      <div class="bg-rd-800 rounded-2xl border border-slate-800 p-5 shadow-xl space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-code text-indigo-400"></i>
+            <span>Generated CSS Code</span>
+          </h2>
+          <div class="flex items-center space-x-4">
+            <!-- Format Selector -->
+            <div class="flex bg-slate-900 p-0.5 rounded-lg border border-slate-800 text-xs">
+              <button data-format="standard" class="code-fmt-btn px-2.5 py-1 rounded-md text-white bg-slate-800 font-medium shadow">CSS</button>
+              <button data-format="tailwind" class="code-fmt-btn px-2.5 py-1 rounded-md text-slate-400 hover:text-white font-medium">Tailwind</button>
+              <button data-format="variable" class="code-fmt-btn px-2.5 py-1 rounded-md text-slate-400 hover:text-white font-medium">CSS Var</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code Box -->
+        <div class="relative group">
+          <pre id="cssOutputCode" class="w-full bg-slate-950 p-4 rounded-xl border border-slate-800/80 font-mono text-xs sm:text-sm text-indigo-300 overflow-x-auto whitespace-pre-wrap leading-relaxed shadow-inner"></pre>
+          <button id="copyCssBoxBtn" class="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow transition flex items-center gap-1.5">
+            <i class="fa-regular fa-copy"></i>
+            <span>Copy Code</span>
+          </button>
+        </div>
+
+        <!-- Export Toggles -->
+        <div class="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-slate-800/60 text-xs">
+          <label class="flex items-center space-x-2 cursor-pointer text-slate-300">
+            <input type="checkbox" id="vendorPrefixesToggle" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+            <span>Include Vendor Prefixes (-webkit-, -moz-)</span>
+          </label>
+          <span class="text-slate-500 italic">Compatible with all modern browsers</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Gradient Settings & Presets (4-5 Cols) -->
+    <div class="lg:col-span-5 xl:col-span-4 flex flex-col space-y-6">
+
+      <!-- Gradient Type & Angle Controls -->
+      <div class="bg-rd-800 rounded-2xl border border-slate-800 p-5 shadow-xl space-y-5">
+        <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-3">
+          <i class="fa-solid fa-compass text-indigo-400"></i>
+          <span>Gradient Type & Direction</span>
+        </h2>
+
+        <!-- Type Toggle (Linear / Radial) -->
+        <div class="grid grid-cols-2 gap-2 p-1 bg-slate-900 rounded-xl border border-slate-800">
+          <button id="linearTypeBtn" class="py-2 rounded-lg font-medium text-xs flex items-center justify-center gap-2 transition bg-indigo-600 text-white shadow">
+            <i class="fa-solid fa-arrows-left-right"></i>
+            <span>Linear</span>
+          </button>
+          <button id="radialTypeBtn" class="py-2 rounded-lg font-medium text-xs flex items-center justify-center gap-2 transition text-slate-400 hover:text-white">
+            <i class="fa-solid fa-circle-dot"></i>
+            <span>Radial</span>
+          </button>
+        </div>
+
+        <!-- Linear Angle Dial & Slider Controls -->
+        <div id="linearControls" class="space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-slate-300">Angle Degree:</span>
+            <span id="angleValueText" class="text-xs font-mono text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20 font-bold">90°</span>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <!-- Angle Interactive Dial Knob -->
+            <div id="angleDial" class="relative w-14 h-14 rounded-full bg-slate-900 border-2 border-slate-700 cursor-grab active:cursor-grabbing flex items-center justify-center shrink-0 shadow-inner">
+              <div id="angleDialPointer" class="absolute w-1 h-6 bg-indigo-500 rounded-full top-1 origin-bottom transform rotate-90 transition-transform"></div>
+              <div class="w-3 h-3 rounded-full bg-indigo-400 z-10"></div>
+            </div>
+
+            <!-- Angle Slider -->
+            <div class="flex-1 space-y-2">
+              <input type="range" id="angleSlider" min="0" max="360" value="90" class="w-full">
+              <!-- Preset Directions Quick Buttons -->
+              <div class="grid grid-cols-4 gap-1">
+                <button data-angle="0" class="angle-preset-btn px-1.5 py-1 bg-slate-900 hover:bg-slate-700 text-[10px] font-mono text-slate-300 rounded border border-slate-800">0°</button>
+                <button data-angle="90" class="angle-preset-btn px-1.5 py-1 bg-slate-900 hover:bg-slate-700 text-[10px] font-mono text-slate-300 rounded border border-slate-800">90°</button>
+                <button data-angle="180" class="angle-preset-btn px-1.5 py-1 bg-slate-900 hover:bg-slate-700 text-[10px] font-mono text-slate-300 rounded border border-slate-800">180°</button>
+                <button data-angle="270" class="angle-preset-btn px-1.5 py-1 bg-slate-900 hover:bg-slate-700 text-[10px] font-mono text-slate-300 rounded border border-slate-800">270°</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Radial Gradient Controls -->
+        <div id="radialControls" class="space-y-4 hidden">
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-slate-300 block">Radial Shape:</label>
+            <select id="radialShapeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 focus:outline-none focus:border-indigo-500">
+              <option value="ellipse">Ellipse (Default)</option>
+              <option value="circle">Circle</option>
+            </select>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-slate-300 block">Center Position:</label>
+            <select id="radialPositionSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 focus:outline-none focus:border-indigo-500">
+              <option value="center center">Center (50% 50%)</option>
+              <option value="top left">Top Left</option>
+              <option value="top right">Top Right</option>
+              <option value="bottom left">Bottom Left</option>
+              <option value="bottom right">Bottom Right</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Utility Buttons (Flip Order, Equalize Stops) -->
+        <div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+          <button id="reverseStopsBtn" class="flex-1 py-1.5 bg-slate-900 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-medium text-slate-300 transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            <span>Reverse Stops</span>
+          </button>
+          <button id="distributeStopsBtn" class="flex-1 py-1.5 bg-slate-900 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-medium text-slate-300 transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-distribute-spacing-horizontal"></i>
+            <span>Space Evenly</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Preset Library Gallery -->
+      <div class="bg-rd-800 rounded-2xl border border-slate-800 p-5 shadow-xl space-y-4 flex-1 flex flex-col">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-swatchbook text-indigo-400"></i>
+            <span>Preset Gallery</span>
+          </h2>
+          <span class="text-[11px] text-slate-400 font-mono">Curated R&D Styles</span>
+        </div>
+
+        <!-- Presets Grid -->
+        <div class="grid grid-cols-2 gap-3 overflow-y-auto max-h-[340px] pr-1" id="presetsGrid">
+          <!-- Dynamically populated presets -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Notification Toast Modal -->
+  <div id="toast" class="fixed bottom-6 right-6 px-4 py-3 bg-indigo-600 text-white font-medium text-xs rounded-xl shadow-2xl border border-indigo-400/30 flex items-center gap-2 translate-y-20 opacity-0 transition-all duration-300 z-50">
+    <i class="fa-solid fa-circle-check text-white text-base"></i>
+    <span id="toastMsg">Gradient CSS copied to clipboard!</span>
+  </div>
+
+  <!-- JavaScript Logic Application -->
+  <script>
+    // State management
+    const state = {
+      type: 'linear', // 'linear' or 'radial'
+      angle: 90, // 0 to 360
+      radialShape: 'ellipse',
+      radialPosition: 'center center',
+      vendorPrefixes: false,
+      codeFormat: 'standard', // 'standard', 'tailwind', 'variable'
+      aspectRatio: 'card', // 'banner', 'card', 'circle'
+      stops: [
+        { id: 1, color: '#6366f1', opacity: 100, position: 0 },
+        { id: 2, color: '#a855f7', opacity: 100, position: 50 },
+        { id: 3, color: '#06b6d4', opacity: 100, position: 100 }
+      ],
+      activeStopId: 1
+    };
+
+    // Curated R&D Gradient Presets
+    const presets = [
+      {
+        name: 'Neon Cyber',
+        type: 'linear',
+        angle: 135,
+        stops: [
+          { id: 1, color: '#00F2FE', opacity: 100, position: 0 },
+          { id: 2, color: '#4FACFE', opacity: 100, position: 50 },
+          { id: 3, color: '#6B11FF', opacity: 100, position: 100 }
+        ]
+      },
+      {
+        name: 'Sunset Glow',
+        type: 'linear',
+        angle: 90,
+        stops: [
+          { id: 1, color: '#FF0844', opacity: 100, position: 0 },
+          { id: 2, color: '#FFB199', opacity: 100, position: 100 }
+        ]
+      },
+      {
+        name: 'Aurora Borealis',
+        type: 'linear',
+        angle: 120,
+        stops: [
+          { id: 1, color: '#43E97B', opacity: 100, position: 0 },
+          { id: 2, color: '#38F9D7', opacity: 100, position: 50 },
+          { id: 3, color: '#667EEA', opacity: 100, position: 100 }
+        ]
+      },
+      {
+        name: 'Deep Space',
+        type: 'radial',
+        radialShape: 'ellipse',
+        radialPosition: 'center center',
+        stops: [
+          { id: 1, color: '#111827', opacity: 100, position: 0 },
+          { id: 2, color: '#311042', opacity: 100, position: 50 },
+          { id: 3, color: '#0B0F19', opacity: 100, position: 100 }
+        ]
+      },
+      {
+        name: 'Glassmorphism',
+        type: 'linear',
+        angle: 135,
+        stops: [
+          { id: 1, color: '#FFFFFF', opacity: 40, position: 0 },
+          { id: 2, color: '#FFFFFF', opacity: 10, position: 100 }
+        ]
+      },
+      {
+        name: 'Pastel Dream',
+        type: 'linear',
+        angle: 45,
+        stops: [
+          { id: 1, color: '#FF9A9E', opacity: 100, position: 0 },
+          { id: 2, color: '#FECFEF', opacity: 100, position: 50 },
+          { id: 3, color: '#A1C4FD', opacity: 100, position: 100 }
+        ]
+      },
+      {
+        name: 'Emerald Matrix',
+        type: 'linear',
+        angle: 180,
+        stops: [
+          { id: 1, color: '#059669', opacity: 100, position: 0 },
+          { id: 2, color: '#10B981', opacity: 100, position: 50 },
+          { id: 3, color: '#022C22', opacity: 100, position: 100 }
+        ]
+      },
+      {
+        name: 'Hyper Violet',
+        type: 'radial',
+        radialShape: 'circle',
+        radialPosition: 'center center',
+        stops: [
+          { id: 1, color: '#C084FC', opacity: 100, position: 0 },
+          { id: 2, color: '#7E22CE', opacity: 100, position: 60 },
+          { id: 3, color: '#3B0764', opacity: 100, position: 100 }
+        ]
+      }
+    ];
+
+    // DOM Element References
+    const gradientPreview = document.getElementById('gradientPreview');
+    const previewContainer = document.getElementById('previewContainer');
+    const overlaySpecText = document.getElementById('overlaySpecText');
+    const colorBarTrack = document.getElementById('colorBarTrack');
+    const colorBarGradient = document.getElementById('colorBarGradient');
+    const cssOutputCode = document.getElementById('cssOutputCode');
+    
+    const stopColorPicker = document.getElementById('stopColorPicker');
+    const stopColorHex = document.getElementById('stopColorHex');
+    const stopPositionRange = document.getElementById('stopPositionRange');
+    const stopPositionVal = document.getElementById('stopPositionVal');
+    const stopOpacityRange = document.getElementById('stopOpacityRange');
+    const stopOpacityVal = document.getElementById('stopOpacityVal');
+    const deleteStopBtn = document.getElementById('deleteStopBtn');
+
+    const linearTypeBtn = document.getElementById('linearTypeBtn');
+    const radialTypeBtn = document.getElementById('radialTypeBtn');
+    const linearControls = document.getElementById('linearControls');
+    const radialControls = document.getElementById('radialControls');
+    
+    const angleSlider = document.getElementById('angleSlider');
+    const angleValueText = document.getElementById('angleValueText');
+    const angleDial = document.getElementById('angleDial');
+    const angleDialPointer = document.getElementById('angleDialPointer');
+    
+    const radialShapeSelect = document.getElementById('radialShapeSelect');
+    const radialPositionSelect = document.getElementById('radialPositionSelect');
+
+    const presetsGrid = document.getElementById('presetsGrid');
+    const vendorPrefixesToggle = document.getElementById('vendorPrefixesToggle');
+
+    // Helper: Convert Hex + Opacity (0-100) to RGBA String
+    function hexToRgba(hex, opacity = 100) {
+      let c = hex.replace('#', '');
+      if (c.length === 3) {
+        c = c.split('').map(x => x + x).join('');
+      }
+      const num = parseInt(c, 16);
+      const r = (num >> 16) & 255;
+      const g = (num >> 8) & 255;
+      const b = num & 255;
+      const a = (opacity / 100).toFixed(2);
+      return `rgba(${r}, ${g}, ${b}, ${a})`;
+    }
+
+    // Generate Standard CSS Gradient String
+    function generateGradientString(isClean = false) {
+      // Sort stops by position
+      const sortedStops = [...state.stops].sort((a, b) => a.position - b.position);
+      const stopsStr = sortedStops.map(s => `${hexToRgba(s.color, s.opacity)} ${s.position}%`).join(', ');
+
+      if (state.type === 'linear') {
+        return `linear-gradient(${state.angle}deg, ${stopsStr})`;
+      } else {
+        return `radial-gradient(${state.radialShape} at ${state.radialPosition}, ${stopsStr})`;
+      }
+    }
+
+    // Render Preview & Track Gradient
+    function renderGradient() {
+      const gradCss = generateGradientString();
+      gradientPreview.style.background = gradCss;
+      overlaySpecText.textContent = gradCss;
+
+      // Render Multi-stop bar gradient
+      colorBarGradient.style.background = gradCss;
+
+      // Update Code Box Output
+      updateCodeOutput();
+
+      // Render Handles on Track
+      renderTrackHandles();
+    }
+
+    // Render Drag Handles on Interactive Slider Track
+    function renderTrackHandles() {
+      // Clear existing handles
+      const oldHandles = colorBarTrack.querySelectorAll('.stop-handle');
+      oldHandles.forEach(h => h.remove());
+
+      state.stops.forEach(stop => {
+        const handle = document.createElement('div');
+        handle.className = `stop-handle border-2 border-white ${stop.id === state.activeStopId ? 'active' : ''}`;
+        handle.style.left = `${stop.position}%`;
+        handle.style.backgroundColor = stop.color;
+
+        // Click to Select Stop
+        handle.addEventListener('mousedown', (e) => {
+          e.stopPropagation();
+          selectStop(stop.id);
+          initDragStop(e, stop.id);
+        });
+
+        // Touch support
+        handle.addEventListener('touchstart', (e) => {
+          e.stopPropagation();
+          selectStop(stop.id);
+          const touch = e.touches[0];
+          initDragStop(touch, stop.id);
+        }, { passive: true });
+
+        colorBarTrack.appendChild(handle);
+      });
+
+      updateStopControlUI();
+    }
+
+    // Select Stop and Load Data to Controls
+    function selectStop(id) {
+      state.activeStopId = id;
+      renderTrackHandles();
+    }
+
+    // Update Control Card with Active Stop Attributes
+    function updateStopControlUI() {
+      const activeStop = state.stops.find(s => s.id === state.activeStopId);
+      if (!activeStop) return;
+
+      stopColorPicker.value = activeStop.color;
+      stopColorHex.value = activeStop.color;
+      stopPositionRange.value = activeStop.position;
+      stopPositionVal.textContent = `${activeStop.position}%`;
+      stopOpacityRange.value = activeStop.opacity;
+      stopOpacityVal.textContent = `${activeStop.opacity}%`;
+
+      // Disable delete button if <= 2 stops
+      deleteStopBtn.disabled = state.stops.length <= 2;
+      if (state.stops.length <= 2) {
+        deleteStopBtn.classList.add('opacity-40', 'cursor-not-allowed');
+      } else {
+        deleteStopBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+      }
+    }
+
+    // Handle Dragging Stops on Track
+    function initDragStop(e, stopId) {
+      const trackRect = colorBarTrack.getBoundingClientRect();
+
+      function onMove(clientX) {
+        let pct = Math.round(((clientX - trackRect.left) / trackRect.width) * 100);
+        pct = Math.max(0, Math.min(100, pct));
+
+        const stop = state.stops.find(s => s.id === stopId);
+        if (stop) {
+          stop.position = pct;
+          renderGradient();
+        }
+      }
+
+      function onMouseMove(evt) {
+        onMove(evt.clientX);
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    // Click anywhere on track to add new color stop
+    colorBarTrack.addEventListener('click', (e) => {
+      const trackRect = colorBarTrack.getBoundingClientRect();
+      const clickPct = Math.round(((e.clientX - trackRect.left) / trackRect.width) * 100);
+
+      // Create new stop ID
+      const newId = Date.now();
+      const newStop = {
+        id: newId,
+        color: '#3b82f6',
+        opacity: 100,
+        position: Math.max(0, Math.min(100, clickPct))
+      };
+
+      state.stops.push(newStop);
+      state.activeStopId = newId;
+      renderGradient();
+    });
+
+    // Update Generated Code Representation
+    function updateCodeOutput() {
+      const gradCss = generateGradientString();
+      let outputStr = '';
+
+      if (state.codeFormat === 'standard') {
+        if (state.vendorPrefixes) {
+          const webkit = gradCss.replace('linear-gradient', '-webkit-linear-gradient').replace('radial-gradient', '-webkit-radial-gradient');
+          const moz = gradCss.replace('linear-gradient', '-moz-linear-gradient').replace('radial-gradient', '-moz-radial-gradient');
+          outputStr = `background: ${webkit};\nbackground: ${moz};\nbackground: ${gradCss};`;
+        } else {
+          outputStr = `background: ${gradCss};`;
+        }
+      } else if (state.codeFormat === 'tailwind') {
+        outputStr = `bg-[${gradCss.replace(/\s+/g, '_')}]`;
+      } else if (state.codeFormat === 'variable') {
+        outputStr = `--bg-gradient: ${gradCss};\nbackground: var(--bg-gradient);`;
+      }
+
+      cssOutputCode.textContent = outputStr;
+    }
+
+    // Event Listeners for Stop Control Updates
+    stopColorPicker.addEventListener('input', (e) => {
+      const stop = state.stops.find(s => s.id === state.activeStopId);
+      if (stop) {
+        stop.color = e.target.value;
+        stopColorHex.value = e.target.value;
+        renderGradient();
+      }
+    });
+
+    stopColorHex.addEventListener('change', (e) => {
+      let val = e.target.value;
+      if (!val.startsWith('#')) val = '#' + val;
+      if (/^#[0-9A-F]{6}$/i.test(val)) {
+        const stop = state.stops.find(s => s.id === state.activeStopId);
+        if (stop) {
+          stop.color = val;
+          stopColorPicker.value = val;
+          renderGradient();
+        }
+      }
+    });
+
+    stopPositionRange.addEventListener('input', (e) => {
+      const stop = state.stops.find(s => s.id === state.activeStopId);
+      if (stop) {
+        stop.position = parseInt(e.target.value, 10);
+        renderGradient();
+      }
+    });
+
+    stopOpacityRange.addEventListener('input', (e) => {
+      const stop = state.stops.find(s => s.id === state.activeStopId);
+      if (stop) {
+        stop.opacity = parseInt(e.target.value, 10);
+        renderGradient();
+      }
+    });
+
+    deleteStopBtn.addEventListener('click', () => {
+      if (state.stops.length > 2) {
+        state.stops = state.stops.filter(s => s.id !== state.activeStopId);
+        state.activeStopId = state.stops[0].id;
+        renderGradient();
+      }
+    });
+
+    // Linear vs Radial Toggle Handlers
+    linearTypeBtn.addEventListener('click', () => {
+      state.type = 'linear';
+      linearTypeBtn.className = 'py-2 rounded-lg font-medium text-xs flex items-center justify-center gap-2 transition bg-indigo-600 text-white shadow';
+      radialTypeBtn.className = 'py-2 rounded-lg font-medium text-xs flex items-center justify-center gap-2 transition text-slate-400 hover:text-white';
+      linearControls.classList.remove('hidden');
+      radialControls.classList.add('hidden');
+      renderGradient();
+    });
+
+    radialTypeBtn.addEventListener('click', () => {
+      state.type = 'radial';
+      radialTypeBtn.className = 'py-2 rounded-lg font-medium text-xs flex items-center justify-center gap-2 transition bg-indigo-600 text-white shadow';
+      linearTypeBtn.className = 'py-2 rounded-lg font-medium text-xs flex items-center justify-center gap-2 transition text-slate-400 hover:text-white';
+      radialControls.classList.remove('hidden');
+      linearControls.classList.add('hidden');
+      renderGradient();
+    });
+
+    // Angle Controls
+    function setAngle(deg) {
+      state.angle = deg;
+      angleSlider.value = deg;
+      angleValueText.textContent = `${deg}°`;
+      angleDialPointer.style.transform = `rotate(${deg}deg)`;
+      renderGradient();
+    }
+
+    angleSlider.addEventListener('input', (e) => {
+      setAngle(parseInt(e.target.value, 10));
+    });
+
+    // Angle Dial Knob Interactive Mouse Rotation
+    let isDialDragging = false;
+    angleDial.addEventListener('mousedown', (e) => {
+      isDialDragging = true;
+      updateDialAngle(e);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDialDragging) updateDialAngle(e);
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDialDragging = false;
+    });
+
+    function updateDialAngle(e) {
+      const rect = angleDial.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const radians = Math.atan2(e.clientX - centerX, -(e.clientY - centerY));
+      let degrees = Math.round(radians * (180 / Math.PI));
+      if (degrees < 0) degrees += 360;
+      setAngle(degrees);
+    }
+
+    // Quick Angle Preset Buttons
+    document.querySelectorAll('.angle-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setAngle(parseInt(btn.dataset.angle, 10));
+      });
+    });
+
+    // Radial Controls
+    radialShapeSelect.addEventListener('change', (e) => {
+      state.radialShape = e.target.value;
+      renderGradient();
+    });
+
+    radialPositionSelect.addEventListener('change', (e) => {
+      state.radialPosition = e.target.value;
+      renderGradient();
+    });
+
+    // Reverse Stops
+    document.getElementById('reverseStopsBtn').addEventListener('click', () => {
+      state.stops.forEach(s => {
+        s.position = 100 - s.position;
+      });
+      renderGradient();
+    });
+
+    // Evenly Distribute Stops
+    document.getElementById('distributeStopsBtn').addEventListener('click', () => {
+      const count = state.stops.length;
+      const step = 100 / (count - 1);
+      state.stops.sort((a, b) => a.position - b.position).forEach((s, idx) => {
+        s.position = Math.round(idx * step);
+      });
+      renderGradient();
+    });
+
+    // Populate Preset Cards Gallery
+    function populatePresets() {
+      presetsGrid.innerHTML = '';
+      presets.forEach(p => {
+        const tempState = { ...state, ...p };
+        // Create mock gradient string
+        const sortedStops = [...p.stops].sort((a, b) => a.position - b.position);
+        const stopsStr = sortedStops.map(s => `${hexToRgba(s.color, s.opacity)} ${s.position}%`).join(', ');
+        const bgGrad = p.type === 'linear' 
+          ? `linear-gradient(${p.angle || 90}deg, ${stopsStr})`
+          : `radial-gradient(${p.radialShape || 'ellipse'} at ${p.radialPosition || 'center center'}, ${stopsStr})`;
+
+        const card = document.createElement('div');
+        card.className = 'group relative h-20 rounded-xl overflow-hidden border border-slate-700/60 cursor-pointer shadow-md hover:border-indigo-500/80 transition-all transform hover:-translate-y-0.5';
+        card.innerHTML = `
+          <div class="w-full h-full" style="background: ${bgGrad}"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-rd-900/90 via-transparent to-transparent p-2 flex items-end">
+            <span class="text-[11px] font-semibold text-slate-200 group-hover:text-indigo-300 transition">${p.name}</span>
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          state.type = p.type;
+          if (p.angle !== undefined) setAngle(p.angle);
+          if (p.radialShape) state.radialShape = p.radialShape;
+          if (p.radialPosition) state.radialPosition = p.radialPosition;
+          
+          // Deep clone stops
+          state.stops = JSON.parse(JSON.stringify(p.stops));
+          state.activeStopId = state.stops[0].id;
+
+          // Sync UI
+          if (p.type === 'linear') {
+            linearTypeBtn.click();
+          } else {
+            radialTypeBtn.click();
+          }
+
+          renderGradient();
+          showToast(`Loaded preset "${p.name}"`);
+        });
+
+        presetsGrid.appendChild(card);
+      });
+    }
+
+    // Code Format Switcher Buttons
+    document.querySelectorAll('.code-fmt-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.code-fmt-btn').forEach(b => {
+          b.className = 'code-fmt-btn px-2.5 py-1 rounded-md text-slate-400 hover:text-white font-medium';
+        });
+        btn.className = 'code-fmt-btn px-2.5 py-1 rounded-md text-white bg-slate-800 font-medium shadow';
+        state.codeFormat = btn.dataset.format;
+        updateCodeOutput();
+      });
+    });
+
+    // Vendor Prefixes Toggle
+    vendorPrefixesToggle.addEventListener('change', (e) => {
+      state.vendorPrefixes = e.target.checked;
+      updateCodeOutput();
+    });
+
+    // Aspect Ratio / Shape Preview Toggle
+    document.querySelectorAll('.aspect-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.aspect-btn').forEach(b => {
+          b.className = 'aspect-btn px-2 py-0.5 text-[11px] rounded font-medium text-slate-400 hover:text-white transition';
+        });
+        btn.className = 'aspect-btn px-2 py-0.5 text-[11px] rounded font-medium text-white bg-slate-800 shadow transition';
+
+        const aspect = btn.dataset.aspect;
+        if (aspect === 'banner') {
+          previewContainer.className = 'relative w-full h-44 rounded-xl overflow-hidden checkerboard transition-all duration-300 flex items-center justify-center group';
+        } else if (aspect === 'card') {
+          previewContainer.className = 'relative w-full h-72 sm:h-80 rounded-xl overflow-hidden checkerboard transition-all duration-300 flex items-center justify-center group';
+        } else if (aspect === 'circle') {
+          previewContainer.className = 'relative w-64 h-64 mx-auto rounded-full overflow-hidden checkerboard transition-all duration-300 flex items-center justify-center group';
+        }
+      });
+    });
+
+    // Toggle Transparency Grid Background
+    document.getElementById('toggleCheckerboard').addEventListener('click', () => {
+      previewContainer.classList.toggle('checkerboard');
+    });
+
+    // Randomize Color Palette Generator
+    document.getElementById('randomizeBtn').addEventListener('click', () => {
+      const getRandomHex = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+      state.angle = Math.floor(Math.random() * 360);
+      setAngle(state.angle);
+
+      state.stops = [
+        { id: 1, color: getRandomHex(), opacity: 100, position: 0 },
+        { id: 2, color: getRandomHex(), opacity: 100, position: 50 },
+        { id: 3, color: getRandomHex(), opacity: 100, position: 100 }
+      ];
+      state.activeStopId = 1;
+      renderGradient();
+      showToast('Generated random gradient');
+    });
+
+    // Clipboard Copy Helper
+    function copyToClipboard(text, message = 'Copied CSS code to clipboard!') {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showToast(message);
+      } catch (err) {
+        showToast('Failed to copy');
+      }
+      document.body.removeChild(textArea);
+    }
+
+    document.getElementById('copyCssHeaderBtn').addEventListener('click', () => {
+      copyToClipboard(cssOutputCode.textContent);
+    });
+
+    document.getElementById('copyCssBoxBtn').addEventListener('click', () => {
+      copyToClipboard(cssOutputCode.textContent);
+    });
+
+    // Toast Notification System
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMsg');
+    let toastTimeout;
+
+    function showToast(msg) {
+      toastMsg.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2500);
+    }
+
+    // App Initializer
+    window.onload = function() {
+      populatePresets();
+      setAngle(90);
+      renderGradient();
+    };
+  </script>
+</body>
+</html>

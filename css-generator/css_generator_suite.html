@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Toolkit - Gradient, Shapes & Clip-Path Generator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Transparency Pattern for Gradient & Clip Path previews */
+        .checkerboard-bg {
+            background-color: #ffffff;
+            background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
+                              linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), 
+                              linear-gradient(45deg, transparent 75%, #e2e8f0 75%), 
+                              linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+        }
+
+        .dark .checkerboard-bg {
+            background-color: #1e293b;
+            background-image: linear-gradient(45deg, #0f172a 25%, transparent 25%), 
+                              linear-gradient(-45deg, #0f172a 25%, transparent 25%), 
+                              linear-gradient(45deg, transparent 75%, #0f172a 75%), 
+                              linear-gradient(-45deg, transparent 75%, #0f172a 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+        }
+
+        /* Colorzilla Style Stop Handles */
+        .stop-handle-top {
+            width: 0;
+            height: 0;
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+            border-top: 10px solid #1e293b;
+            position: absolute;
+            top: -10px;
+            transform: translateX(-50%);
+            cursor: pointer;
+            z-index: 10;
+        }
+        .stop-handle-top::after {
+            content: '';
+            position: absolute;
+            top: -16px;
+            left: -6px;
+            width: 12px;
+            height: 6px;
+            background: #cbd5e1;
+            border: 1px solid #475569;
+            border-radius: 1px;
+        }
+        .stop-handle-top.active::after {
+            background: #6366f1;
+            border-color: #4338ca;
+        }
+
+        .stop-handle-bottom {
+            width: 0;
+            height: 0;
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+            border-bottom: 10px solid #1e293b;
+            position: absolute;
+            bottom: -10px;
+            transform: translateX(-50%);
+            cursor: pointer;
+            z-index: 10;
+        }
+        .stop-handle-bottom::after {
+            content: '';
+            position: absolute;
+            bottom: -16px;
+            left: -6px;
+            width: 12px;
+            height: 6px;
+            background: var(--stop-color, #ffffff);
+            border: 1px solid #475569;
+            border-radius: 1px;
+        }
+        .stop-handle-bottom.active::after {
+            box-shadow: 0 0 0 2px #6366f1;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100,116,139,0.4);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(100,116,139,0.7);
+        }
+
+        /* Draggable Anchor points for Clip Path */
+        .clip-point {
+            width: 16px;
+            height: 16px;
+            background-color: #6366f1;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            cursor: move;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.1s ease, background-color 0.1s ease;
+            z-index: 20;
+        }
+        .clip-point:hover, .clip-point.active {
+            transform: translate(-50%, -50%) scale(1.3);
+            background-color: #ef4444;
+        }
+
+        /* Generated Shapes dynamic CSS container */
+        #shape-preview-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 260px;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-full flex flex-col antialiased">
+
+    <!-- Navbar / Header -->
+    <header class="bg-slate-800/80 backdrop-blur border-b border-slate-700/60 sticky top-0 z-50 px-4 lg:px-8 py-3 flex flex-wrap justify-between items-center gap-4">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-brand-600 rounded-lg shadow-lg shadow-brand-500/30 text-white">
+                <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg leading-tight text-white flex items-center gap-2">
+                    CSS Craft Studio
+                    <span class="text-xs bg-brand-500/20 text-brand-300 font-normal px-2 py-0.5 rounded-full border border-brand-500/30">v2.5</span>
+                </h1>
+                <p class="text-xs text-slate-400">Gradient, Shapes & Clip-Path Generator Suite</p>
+            </div>
+        </div>
+
+        <!-- Tab Navigation Buttons -->
+        <nav class="flex bg-slate-900/80 p-1 rounded-xl border border-slate-700/80 text-sm font-medium">
+            <button id="tab-btn-gradient" onclick="switchTab('gradient')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 text-white bg-brand-600 shadow-sm">
+                <i class="fa-solid fa-fill-drip"></i>
+                <span>Gradient</span>
+            </button>
+            <button id="tab-btn-shapes" onclick="switchTab('shapes')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
+                <i class="fa-solid fa-shapes"></i>
+                <span>Shapes</span>
+            </button>
+            <button id="tab-btn-clippath" onclick="switchTab('clippath')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
+                <i class="fa-solid fa-vector-square"></i>
+                <span>Clip Path</span>
+            </button>
+        </nav>
+
+        <!-- Quick actions -->
+        <div class="hidden sm:flex items-center gap-3">
+            <a href="https://developer.mozilla.org/en-US/docs/Web/CSS" target="_blank" rel="noreferrer" class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg transition">
+                <i class="fa-brands fa-mdn"></i> Docs
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6">
+
+        <!-- ========================================== -->
+        <!-- MODULE 1: CSS GRADIENT GENERATOR           -->
+        <!-- ========================================== -->
+        <section id="module-gradient" class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left Panel: Controls & Presets -->
+                <div class="lg:col-span-7 space-y-6">
+                    
+                    <!-- Presets Grid -->
+                    <div class="bg-slate-800 border border-slate-700/80 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                                <i class="fa-solid fa-palette text-brand-500"></i> Colorzilla & Modern Presets
+                            </h2>
+                            <span class="text-xs text-slate-500">Click to apply</span>
+                        </div>
+                        <div id="gradient-presets-container" class="grid grid-cols-5 sm:grid-cols-10 gap-2 max-h-36 overflow-y-auto pr-1">
+                            <!-- Presets populated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Multi-Stop Gradient Bar Control -->
+                    <div class="bg-slate-800 border border-slate-700/80 rounded-xl p-5 shadow-sm space-y-5">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-brand-500"></i> Multi-Stop Ramp
+                            </h2>
+                            <div class="text-xs text-slate-400">
+                                Click ramp to add stop. Drag handles to adjust.
+                            </div>
+                        </div>
+
+                        <!-- Gradient Track with Handles -->
+                        <div class="py-5 px-2">
+                            <div id="gradient-ramp-wrapper" class="relative checkerboard-bg rounded-md h-12 border border-slate-600 shadow-inner cursor-crosshair">
+                                <div id="gradient-ramp-preview" class="w-full h-full rounded-sm"></div>
+                                <!-- Top (Opacity) & Bottom (Color) Stop Handles will be injected here -->
+                            </div>
+                        </div>
+
+                        <!-- Action Toolbar -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-700/60">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <button onclick="gradientApp.reverseStops()" class="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg border border-slate-600 flex items-center gap-1.5 transition">
+                                    <i class="fa-solid fa-arrows-rotate"></i> Reverse
+                                </button>
+                                <button onclick="gradientApp.randomize()" class="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg border border-slate-600 flex items-center gap-1.5 transition">
+                                    <i class="fa-solid fa-dice"></i> Randomize
+                                </button>
+                                <button onclick="gradientApp.openImportModal()" class="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg border border-slate-600 flex items-center gap-1.5 transition">
+                                    <i class="fa-solid fa-file-import"></i> Import CSS
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs text-slate-400">Preset Name:</label>
+                                <input type="text" id="preset-name-input" value="Custom Gradient" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white w-32 focus:outline-none focus:border-brand-500">
+                                <button onclick="gradientApp.saveCustomPreset()" class="px-3 py-1 text-xs bg-brand-600 hover:bg-brand-500 text-white rounded font-medium transition">
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Selected Stop Controls Box -->
+                        <div id="stop-details-card" class="bg-slate-900/80 border border-slate-700/80 rounded-lg p-3 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <div class="space-y-2">
+                                <span class="font-semibold text-slate-300 flex items-center justify-between">
+                                    <span>Selected Color Stop</span>
+                                    <button id="btn-delete-color-stop" onclick="gradientApp.deleteSelectedStop('color')" class="text-red-400 hover:text-red-300 disabled:opacity-30 disabled:hover:text-red-400" disabled>
+                                        <i class="fa-solid fa-trash"></i> Delete
+                                    </button>
+                                </span>
+                                <div class="flex items-center gap-3">
+                                    <input type="color" id="stop-color-input" class="w-8 h-8 rounded bg-transparent cursor-pointer border-0">
+                                    <div class="flex-1 flex items-center gap-2">
+                                        <label class="text-slate-400">Pos:</label>
+                                        <input type="number" id="stop-color-pos" min="0" max="100" class="w-16 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white">
+                                        <span>%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2 sm:border-l sm:border-slate-800 sm:pl-4">
+                                <span class="font-semibold text-slate-300 flex items-center justify-between">
+                                    <span>Selected Opacity Stop</span>
+                                    <button id="btn-delete-opacity-stop" onclick="gradientApp.deleteSelectedStop('opacity')" class="text-red-400 hover:text-red-300 disabled:opacity-30 disabled:hover:text-red-400" disabled>
+                                        <i class="fa-solid fa-trash"></i> Delete
+                                    </button>
+                                </span>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-1 space-y-1">
+                                        <div class="flex justify-between text-slate-400">
+                                            <span>Opacity:</span>
+                                            <span id="opacity-val-label">100%</span>
+                                        </div>
+                                        <input type="range" id="stop-opacity-slider" min="0" max="100" value="100" class="w-full accent-brand-500">
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <label class="text-slate-400">Pos:</label>
+                                        <input type="number" id="stop-opacity-pos" min="0" max="100" class="w-16 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white">
+                                        <span>%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Type, Angle & Color Format Controls -->
+                    <div class="bg-slate-800 border border-slate-700/80 rounded-xl p-4 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1.5">Gradient Type</label>
+                            <select id="gradient-type-select" onchange="gradientApp.updateType(this.value)" class="w-full bg-slate-900 border border-slate-700 text-xs rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-500">
+                                <option value="linear">Linear Gradient</option>
+                                <option value="radial">Radial Gradient</option>
+                                <option value="conic">Conic Gradient</option>
+                            </select>
+                        </div>
+                        
+                        <div id="angle-control-group">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <label class="text-xs font-medium text-slate-400">Angle / Direction</label>
+                                <span id="angle-value-display" class="text-xs text-brand-400 font-mono">90 deg</span>
+                            </div>
+                            <input type="range" id="gradient-angle-slider" min="0" max="360" value="90" oninput="gradientApp.updateAngle(this.value)" class="w-full accent-brand-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1.5">Color Format</label>
+                            <select id="color-format-select" onchange="gradientApp.updateFormat(this.value)" class="w-full bg-slate-900 border border-slate-700 text-xs rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-500">
+                                <option value="hex">HEX / HEXA</option>
+                                <option value="rgb">RGB / RGBA</option>
+                                <option value="hsl">HSL / HSLA</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Panel: Preview & Code Output -->
+                <div class="lg:col-span-5 space-y-6">
+                    
+                    <!-- Canvas Preview -->
+                    <div class="bg-slate-800 border border-slate-700/80 rounded-xl p-4 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                                <i class="fa-solid fa-eye text-brand-500"></i> Live Canvas Preview
+                            </h2>
+                            <div class="flex items-center gap-2">
+                                <button onclick="gradientApp.toggleCheckerboard()" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded text-slate-300 border border-slate-600">
+                                    Toggle Pattern
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="gradient-preview-container" class="checkerboard-bg rounded-lg border border-slate-700 h-64 overflow-hidden relative flex items-center justify-center p-4">
+                            <div id="main-gradient-preview" class="w-full h-full rounded-md shadow-md transition-all"></div>
+                        </div>
+
+                        <!-- Dimension adjustments -->
+                        <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
+                            <div class="flex items-center gap-2">
+                                <span>Preview Size:</span>
+                                <input type="number" id="preview-width-input" value="100" class="w-12 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-white text-center"> %
+                                <span>x</span>
+                                <input type="number" id="preview-height-input" value="240" class="w-14 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-white text-center"> px
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CSS Output -->
+                    <div class="bg-slate-800 border border-slate-700/80 rounded-xl p-4 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                                <i class="fa-solid fa-code text-brand-500"></i> Generated CSS
+                            </h2>
+                            <div class="flex items-center gap-2">
+                                <button onclick="gradientApp.toggleSCSS()" id="btn-scss-toggle" class="text-xs text-slate-400 hover:text-white px-2 py-0.5 rounded border border-slate-700">
+                                    SCSS: OFF
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="relative">
+                            <textarea id="gradient-css-output" readonly rows="4" class="w-full bg-slate-950 font-mono text-xs text-emerald-400 p-3 rounded-lg border border-slate-800 focus:outline-none resize-none"></textarea>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button onclick="copyToClipboard('gradient-css-output')" class="flex-1 bg-brand-600 hover:bg-brand-500 text-white font-medium py-2 px-4 rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
+                                <i class="fa-solid fa-copy"></i> Copy CSS Code
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- MODULE 2: CSS SHAPES GENERATOR             -->
+        <!-- ========================================== -->
+        <section id="module-shapes" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left Column: Shapes Catalog -->
+                <div class="lg:col-span-5 bg-slate-800 border border-slate-700/80 rounded-xl p-4 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+                        <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                            <i class="fa-solid fa-shapes text-brand-500"></i> Shapes Catalog
+                        </h2>
+                        <span class="text-xs text-slate-500">Select a shape to tweak</span>
+                    </div>
+
+                    <!-- Shape Gallery Grid -->
+                    <div id="shapes-catalog-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[520px] overflow-y-auto pr-1">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+                <!-- Right Column: Inspector, Preview & Output -->
+                <div class="lg:col-span-7 space-y-6">
+                    
+                    <!-- Preview Box -->
+                    <div class="bg-slate-800 border border-slate-700/80 rounded-xl p-5 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+                            <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                                <i class="fa-solid fa-desktop text-brand-500"></i> Shape Visualizer
+                            </h2>
+                            <span id="current-shape-title" class="text-xs font-bold text-brand-400">Triangle Up</span>
+                        </div>
+
+                        <div id="shape-preview-box" class="checkerboard-bg rounded-lg border border-slate-700/80 p-8 flex items-center justify-center min-h-[280px]">
+                            <div id="active-shape-element"></div>
+                        </div>
+                    </div>
+
+                    <!-- Customization Controls & Generated Code Split -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <!-- Dynamic Controls -->
+                        <div class="bg-slate-800 border border-slate-700/80 rounded-xl p-4 shadow-sm space-y-4">
+                            <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-700/60 pb-2">
+                                Customization Parameters
+                            </h2>
+                            <div id="shape-controls-container" class="space-y-3 text-xs">
+                                <!-- Controls generated on shape selection -->
+                            </div>
+                        </div>
+
+                        <!-- Code Box -->
+                        <div class="bg-slate-800 border border-slate-700/80 rounded-xl p-4 shadow-sm space-y-3 flex flex-col justify-between">
+                            <div>
+                                <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-700/60 pb-2 mb-3">
+                                    Pure CSS Code
+                                </h2>
+                                <textarea id="shape-css-output" readonly rows="8" class="w-full bg-slate-950 font-mono text-xs text-emerald-400 p-3 rounded-lg border border-slate-800 focus:outline-none resize-none"></textarea>
+                            </div>
+                            <button onclick="copyToClipboard('shape-css-output')" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium py-2 px-4 rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
+                                <i class="fa-solid fa-copy"></i> Copy Shape CSS
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- MODULE 3: CLIP PATH GENERATOR              -->
+        <!-- ========================================== -->
+        <section id="module-clippath" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left Panel: Shape Presets & Controls -->
+                <div class="lg:col-span-4 space-y-6">
+                    
+                    <div class="bg-slate-800 border border-slate-700/80 rounded-xl p-4 shadow-sm space-y-4">
+                        <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2 border-b border-slate-700/60 pb-2">
+                            <i class="fa-solid fa-draw-polygon text-brand-500"></i> Clip Path Templates
+                        </h2>
+
+                        <!-- Preset Buttons Grid -->
+                        <div id="clip-templates-grid" class="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-1">
+                            <!-- Populated via JS -->
+                        </div>
+
+                        <!-- Active Control Tweaks -->
+                        <div class="pt-2 border-t border-slate-700/60 space-y-3">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-slate-400">Polygon Points:</span>
+                                <span id="clip-points-count" class="font-mono text-brand-400">4</span>
+                            </div>
+
+                            <div id="polygon-actions-row" class="flex gap-2">
+                                <button onclick="clipPathApp.addPoint()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-xs py-1.5 rounded text-slate-200 border border-slate-600 flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-plus"></i> Add Point
+                                </button>
+                                <button onclick="clipPathApp.removePoint()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-xs py-1.5 rounded text-slate-200 border border-slate-600 flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-minus"></i> Remove Point
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Background / Canvas Customization -->
+                    <div class="bg-slate-800 border border-slate-700/80 rounded-xl p-4 shadow-sm space-y-3 text-xs">
+                        <h2 class="font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-700/60 pb-2">
+                            Preview Background
+                        </h2>
+                        
+                        <div class="space-y-2">
+                            <label class="text-slate-400 block">Fill Type:</label>
+                            <select id="clip-bg-type" onchange="clipPathApp.changeBgType(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white">
+                                <option value="image">Sample Image</option>
+                                <option value="gradient">Linear Gradient</option>
+                                <option value="solid">Solid Color</option>
+                            </select>
+                        </div>
+
+                        <div id="clip-bg-color-picker" class="hidden space-y-2">
+                            <label class="text-slate-400 block">Solid Color:</label>
+                            <input type="color" id="clip-solid-color" value="#4f46e5" oninput="clipPathApp.updateBg()" class="w-full h-8 bg-transparent cursor-pointer rounded">
+                        </div>
+
+                        <div id="clip-bg-image-url" class="space-y-2">
+                            <label class="text-slate-400 block">Image URL:</label>
+                            <input type="text" id="clip-image-input" value="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800&q=80" onchange="clipPathApp.updateBg()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white">
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Panel: Interactive Draggable Canvas & Output -->
+                <div class="lg:col-span-8 space-y-6">
+                    
+                    <div class="bg-slate-800 border border-slate-700/80 rounded-xl p-4 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                                <i class="fa-solid fa-hand-pointer text-brand-500"></i> Interactive Canvas (Drag Handles)
+                            </h2>
+                            <span class="text-xs text-slate-500">Drag handles to tweak geometry</span>
+                        </div>
+
+                        <!-- Interactive Wrapper -->
+                        <div id="clip-canvas-container" class="checkerboard-bg rounded-lg border border-slate-700 h-80 relative overflow-hidden flex items-center justify-center p-6 select-none">
+                            <div id="clip-target-box" class="w-full h-full max-w-lg max-h-72 relative shadow-2xl transition-all">
+                                <!-- Foreground Content to be clipped -->
+                                <div id="clip-target-element" class="w-full h-full bg-cover bg-center rounded"></div>
+                                <!-- Overlay Draggable Handle Layer -->
+                                <div id="clip-handles-layer" class="absolute inset-0 pointer-events-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CSS Output -->
+                    <div class="bg-slate-800 border border-slate-700/80 rounded-xl p-4 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                                <i class="fa-solid fa-code text-brand-500"></i> CSS Clip-Path Rule
+                            </h2>
+                        </div>
+
+                        <textarea id="clippath-css-output" readonly rows="3" class="w-full bg-slate-950 font-mono text-xs text-emerald-400 p-3 rounded-lg border border-slate-800 focus:outline-none resize-none"></textarea>
+
+                        <button onclick="copyToClipboard('clippath-css-output')" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium py-2 px-4 rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
+                            <i class="fa-solid fa-copy"></i> Copy Clip-Path CSS
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Global Toast Notification -->
+    <div id="toast-notification" class="fixed bottom-6 right-6 bg-slate-800 border border-brand-500/50 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none z-50">
+        <div class="p-1.5 bg-brand-600/20 text-brand-400 rounded-lg">
+            <i class="fa-solid fa-check text-sm"></i>
+        </div>
+        <div>
+            <p id="toast-title" class="text-xs font-bold">Copied to Clipboard!</p>
+            <p id="toast-msg" class="text-[11px] text-slate-400">Ready to paste in your CSS stylesheet.</p>
+        </div>
+    </div>
+
+    <!-- Import CSS Modal (Gradient) -->
+    <div id="import-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                <h3 class="text-sm font-bold text-white">Import Gradient CSS</h3>
+                <button onclick="gradientApp.closeImportModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-slate-400">Paste standard linear-gradient string (e.g. <code>linear-gradient(90deg, #ff0000 0%, #0000ff 100%)</code>):</p>
+            <textarea id="import-css-input" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-emerald-400 font-mono focus:outline-none"></textarea>
+            <div class="flex justify-end gap-2">
+                <button onclick="gradientApp.closeImportModal()" class="px-3 py-1.5 bg-slate-700 text-xs rounded text-slate-300">Cancel</button>
+                <button onclick="gradientApp.processImport()" class="px-4 py-1.5 bg-brand-600 hover:bg-brand-500 text-xs rounded text-white font-medium">Parse & Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN JAVASCRIPT APP LOGIC -->
+    <script>
+        /* ========================================== */
+        /* GLOBAL TAB SWITCHING & TOAST NOTIFICATION  */
+        /* ========================================== */
+        function switchTab(tabId) {
+            ['gradient', 'shapes', 'clippath'].forEach(id => {
+                const module = document.getElementById(`module-${id}`);
+                const btn = document.getElementById(`tab-btn-${id}`);
+                if (id === tabId) {
+                    module.classList.remove('hidden');
+                    btn.classList.add('bg-brand-600', 'text-white', 'shadow-sm');
+                    btn.classList.remove('text-slate-400', 'hover:bg-slate-800');
+                } else {
+                    module.classList.add('hidden');
+                    btn.classList.remove('bg-brand-600', 'text-white', 'shadow-sm');
+                    btn.classList.add('text-slate-400', 'hover:bg-slate-800');
+                }
+            });
+        }
+
+        function showToast(title, message) {
+            const toast = document.getElementById('toast-notification');
+            document.getElementById('toast-title').innerText = title || "Copied to Clipboard!";
+            document.getElementById('toast-msg').innerText = message || "Ready to paste in your CSS.";
+            
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        function copyToClipboard(elementId) {
+            const textarea = document.getElementById(elementId);
+            textarea.select();
+            document.execCommand('copy');
+            showToast("Copied CSS!", "Code saved to your clipboard.");
+        }
+
+
+        /* ========================================== */
+        /* MODULE 1: CSS GRADIENT GENERATOR LOGIC     */
+        /* ========================================== */
+        class GradientGenerator {
+            constructor() {
+                this.type = 'linear';
+                this.angle = 90;
+                this.colorFormat = 'hex';
+                this.useSCSS = false;
+                
+                // Colorzilla style separate stops array
+                this.colorStops = [
+                    { id: 1, pos: 0, color: '#1e5799' },
+                    { id: 2, pos: 50, color: '#2989d8' },
+                    { id: 3, pos: 51, color: '#207cca' },
+                    { id: 4, pos: 100, color: '#7db9e8' }
+                ];
+                
+                this.opacityStops = [
+                    { id: 101, pos: 0, opacity: 1 },
+                    { id: 102, pos: 100, opacity: 1 }
+                ];
+
+                this.selectedColorStopId = 1;
+                this.selectedOpacityStopId = 101;
+                this.nextId = 200;
+
+                this.presets = [
+                    { name: 'Blue Gloss Default', type: 'linear', angle: 180, colorStops: [{pos:0, color:'#1e5799'},{pos:50, color:'#2989d8'},{pos:51, color:'#207cca'},{pos:100, color:'#7db9e8'}], opacityStops: [{pos:0, opacity:1},{pos:100, opacity:1}] },
+                    { name: 'Dark Metallic', type: 'linear', angle: 180, colorStops: [{pos:0, color:'#000000'},{pos:50, color:'#434343'},{pos:100, color:'#000000'}], opacityStops: [{pos:0, opacity:1},{pos:100, opacity:1}] },
+                    { name: 'Sunset Glow', type: 'linear', angle: 90, colorStops: [{pos:0, color:'#ff7e5f'},{pos:100, color:'#feb47b'}], opacityStops: [{pos:0, opacity:1},{pos:100, opacity:1}] },
+                    { name: 'Neon Cyber', type: 'linear', angle: 135, colorStops: [{pos:0, color:'#f72585'},{pos:50, color:'#7209b7'},{pos:100, color:'#4cc9f0'}], opacityStops: [{pos:0, opacity:1},{pos:100, opacity:1}] },
+                    { name: 'Emerald Glass', type: 'linear', angle: 90, colorStops: [{pos:0, color:'#11998e'},{pos:100, color:'#38ef7d'}], opacityStops: [{pos:0, opacity:0.8},{pos:100, opacity:0.95}] },
+                    { name: 'Pastel Dreams', type: 'linear', angle: 45, colorStops: [{pos:0, color:'#ff9a9e'},{pos:99, color:'#fecfef'}], opacityStops: [{pos:0, opacity:1},{pos:100, opacity:1}] },
+                    { name: 'Vibrant Aqua', type: 'linear', angle: 90, colorStops: [{pos:0, color:'#00c6ff'},{pos:100, color:'#0072ff'}], opacityStops: [{pos:0, opacity:1},{pos:100, opacity:1}] },
+                    { name: 'Glass Transparency', type: 'linear', angle: 180, colorStops: [{pos:0, color:'#ffffff'},{pos:100, color:'#ffffff'}], opacityStops: [{pos:0, opacity:0.6},{pos:100, opacity:0.1}] },
+                    { name: 'Radial Flare', type: 'radial', angle: 0, colorStops: [{pos:0, color:'#ffe066'},{pos:60, color:'#f72585'},{pos:100, color:'#3a0ca3'}], opacityStops: [{pos:0, opacity:1},{pos:100, opacity:1}] },
+                    { name: 'Conic Rainbow', type: 'conic', angle: 0, colorStops: [{pos:0, color:'#red'},{pos:20, color:'#yellow'},{pos:40, color:'#green'},{pos:60, color:'#cyan'},{pos:80, color:'#blue'},{pos:100, color:'#red'}], opacityStops: [{pos:0, opacity:1},{pos:100, opacity:1}] }
+                ];
+
+                this.init();
+            }
+
+            init() {
+                this.renderPresetsGrid();
+                this.attachEventListeners();
+                this.renderRamp();
+                this.updateCSS();
+            }
+
+            renderPresetsGrid() {
+                const container = document.getElementById('gradient-presets-container');
+                container.innerHTML = '';
+                this.presets.forEach((preset, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'w-full h-8 rounded border border-slate-600 shadow-sm transition hover:scale-105 checkerboard-bg relative overflow-hidden';
+                    btn.title = preset.name;
+                    
+                    const inner = document.createElement('div');
+                    inner.className = 'w-full h-full';
+                    inner.style.background = this.generateGradientString(preset);
+                    btn.appendChild(inner);
+
+                    btn.onclick = () => this.loadPreset(preset);
+                    container.appendChild(btn);
+                });
+            }
+
+            attachEventListeners() {
+                const wrapper = document.getElementById('gradient-ramp-wrapper');
+                
+                // Add stop on ramp click if click wasn't on existing stop handle
+                wrapper.onclick = (e) => {
+                    if (e.target.classList.contains('stop-handle-top') || e.target.classList.contains('stop-handle-bottom')) return;
+                    const rect = wrapper.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const pos = Math.round(Math.max(0, Math.min(100, (clickX / rect.width) * 100)));
+                    
+                    // Click in top half adds opacity stop, bottom half adds color stop
+                    const clickY = e.clientY - rect.top;
+                    if (clickY < rect.height / 2) {
+                        this.addOpacityStop(pos, 1);
+                    } else {
+                        this.addColorStop(pos, '#3b82f6');
+                    }
+                };
+
+                // Stop inspectors
+                document.getElementById('stop-color-input').oninput = (e) => {
+                    const stop = this.colorStops.find(s => s.id === this.selectedColorStopId);
+                    if (stop) {
+                        stop.color = e.target.value;
+                        this.renderRamp();
+                        this.updateCSS();
+                    }
+                };
+
+                document.getElementById('stop-color-pos').oninput = (e) => {
+                    const stop = this.colorStops.find(s => s.id === this.selectedColorStopId);
+                    if (stop) {
+                        stop.pos = Number(e.target.value);
+                        this.renderRamp();
+                        this.updateCSS();
+                    }
+                };
+
+                document.getElementById('stop-opacity-slider').oninput = (e) => {
+                    const stop = this.opacityStops.find(s => s.id === this.selectedOpacityStopId);
+                    if (stop) {
+                        stop.opacity = Number(e.target.value) / 100;
+                        document.getElementById('opacity-val-label').innerText = `${e.target.value}%`;
+                        this.renderRamp();
+                        this.updateCSS();
+                    }
+                };
+
+                document.getElementById('stop-opacity-pos').oninput = (e) => {
+                    const stop = this.opacityStops.find(s => s.id === this.selectedOpacityStopId);
+                    if (stop) {
+                        stop.pos = Number(e.target.value);
+                        this.renderRamp();
+                        this.updateCSS();
+                    }
+                };
+
+                // Canvas dimensions
+                document.getElementById('preview-width-input').oninput = (e) => {
+                    document.getElementById('main-gradient-preview').style.width = `${e.target.value}%`;
+                };
+                document.getElementById('preview-height-input').oninput = (e) => {
+                    document.getElementById('main-gradient-preview').style.height = `${e.target.value}px`;
+                };
+            }
+
+            addColorStop(pos, color) {
+                const newStop = { id: this.nextId++, pos, color };
+                this.colorStops.push(newStop);
+                this.selectedColorStopId = newStop.id;
+                this.renderRamp();
+                this.updateCSS();
+            }
+
+            addOpacityStop(pos, opacity) {
+                const newStop = { id: this.nextId++, pos, opacity };
+                this.opacityStops.push(newStop);
+                this.selectedOpacityStopId = newStop.id;
+                this.renderRamp();
+                this.updateCSS();
+            }
+
+            deleteSelectedStop(type) {
+                if (type === 'color' && this.colorStops.length > 2) {
+                    this.colorStops = this.colorStops.filter(s => s.id !== this.selectedColorStopId);
+                    this.selectedColorStopId = this.colorStops[0].id;
+                } else if (type === 'opacity' && this.opacityStops.length > 1) {
+                    this.opacityStops = this.opacityStops.filter(s => s.id !== this.selectedOpacityStopId);
+                    this.selectedOpacityStopId = this.opacityStops[0].id;
+                }
+                this.renderRamp();
+                this.updateCSS();
+            }
+
+            loadPreset(preset) {
+                this.type = preset.type || 'linear';
+                this.angle = preset.angle || 90;
+                document.getElementById('gradient-type-select').value = this.type;
+                document.getElementById('gradient-angle-slider').value = this.angle;
+                document.getElementById('angle-value-display').innerText = `${this.angle} deg`;
+
+                this.colorStops = preset.colorStops.map((s, idx) => ({ id: idx + 1, pos: s.pos, color: s.color }));
+                this.opacityStops = preset.opacityStops.map((s, idx) => ({ id: idx + 101, pos: s.pos, opacity: s.opacity }));
+                this.selectedColorStopId = 1;
+                this.selectedOpacityStopId = 101;
+
+                this.renderRamp();
+                this.updateCSS();
+            }
+
+            renderRamp() {
+                const wrapper = document.getElementById('gradient-ramp-wrapper');
+                
+                // Clear existing handles
+                const existingHandles = wrapper.querySelectorAll('.stop-handle-top, .stop-handle-bottom');
+                existingHandles.forEach(h => h.remove());
+
+                // Sort stops
+                this.colorStops.sort((a,b) => a.pos - b.pos);
+                this.opacityStops.sort((a,b) => a.pos - b.pos);
+
+                // Render Opacity Handles (Top)
+                this.opacityStops.forEach(stop => {
+                    const handle = document.createElement('div');
+                    handle.className = `stop-handle-top ${stop.id === this.selectedOpacityStopId ? 'active' : ''}`;
+                    handle.style.left = `${stop.pos}%`;
+                    
+                    handle.onclick = (e) => {
+                        e.stopPropagation();
+                        this.selectedOpacityStopId = stop.id;
+                        this.renderRamp();
+                        this.updateInspector();
+                    };
+
+                    this.enableDrag(handle, stop, 'opacity');
+                    wrapper.appendChild(handle);
+                });
+
+                // Render Color Handles (Bottom)
+                this.colorStops.forEach(stop => {
+                    const handle = document.createElement('div');
+                    handle.className = `stop-handle-bottom ${stop.id === this.selectedColorStopId ? 'active' : ''}`;
+                    handle.style.left = `${stop.pos}%`;
+                    handle.style.setProperty('--stop-color', stop.color);
+
+                    handle.onclick = (e) => {
+                        e.stopPropagation();
+                        this.selectedColorStopId = stop.id;
+                        this.renderRamp();
+                        this.updateInspector();
+                    };
+
+                    this.enableDrag(handle, stop, 'color');
+                    wrapper.appendChild(handle);
+                });
+
+                // Render background track preview
+                const rampPreview = document.getElementById('gradient-ramp-preview');
+                rampPreview.style.background = this.generateGradientString({
+                    type: 'linear',
+                    angle: 90,
+                    colorStops: this.colorStops,
+                    opacityStops: this.opacityStops
+                });
+
+                this.updateInspector();
+            }
+
+            enableDrag(handle, stopObj, type) {
+                handle.onmousedown = (e) => {
+                    e.preventDefault();
+                    const wrapper = document.getElementById('gradient-ramp-wrapper');
+                    const rect = wrapper.getBoundingClientRect();
+
+                    const onMouseMove = (moveEv) => {
+                        let newPos = Math.round(((moveEv.clientX - rect.left) / rect.width) * 100);
+                        newPos = Math.max(0, Math.min(100, newPos));
+                        stopObj.pos = newPos;
+                        this.renderRamp();
+                        this.updateCSS();
+                    };
+
+                    const onMouseUp = () => {
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onMouseUp);
+                    };
+
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                };
+            }
+
+            updateInspector() {
+                // Color stop inspector
+                const selColor = this.colorStops.find(s => s.id === this.selectedColorStopId);
+                const btnDelColor = document.getElementById('btn-delete-color-stop');
+                if (selColor) {
+                    document.getElementById('stop-color-input').value = this.toHex(selColor.color);
+                    document.getElementById('stop-color-pos').value = selColor.pos;
+                    btnDelColor.disabled = this.colorStops.length <= 2;
+                }
+
+                // Opacity stop inspector
+                const selOpacity = this.opacityStops.find(s => s.id === this.selectedOpacityStopId);
+                const btnDelOpacity = document.getElementById('btn-delete-opacity-stop');
+                if (selOpacity) {
+                    document.getElementById('stop-opacity-slider').value = Math.round(selOpacity.opacity * 100);
+                    document.getElementById('opacity-val-label').innerText = `${Math.round(selOpacity.opacity * 100)}%`;
+                    document.getElementById('stop-opacity-pos').value = selOpacity.pos;
+                    btnDelOpacity.disabled = this.opacityStops.length <= 1;
+                }
+            }
+
+            // Merges opacity and color stops into unified CSS gradient stop representation
+            getCombinedStops() {
+                // Collect unique position points
+                const positions = Array.from(new Set([
+                    ...this.colorStops.map(s => s.pos),
+                    ...this.opacityStops.map(s => s.pos)
+                ])).sort((a, b) => a - b);
+
+                return positions.map(pos => {
+                    const color = this.interpolateColorAt(pos);
+                    const opacity = this.interpolateOpacityAt(pos);
+                    return { pos, rgba: this.applyOpacityToColor(color, opacity) };
+                });
+            }
+
+            interpolateColorAt(pos) {
+                const sorted = [...this.colorStops].sort((a,b) => a.pos - b.pos);
+                if (pos <= sorted[0].pos) return sorted[0].color;
+                if (pos >= sorted[sorted.length-1].pos) return sorted[sorted.length-1].color;
+
+                for (let i = 0; i < sorted.length - 1; i++) {
+                    if (pos >= sorted[i].pos && pos <= sorted[i+1].pos) {
+                        const factor = (pos - sorted[i].pos) / (sorted[i+1].pos - sorted[i].pos);
+                        return this.blendColors(sorted[i].color, sorted[i+1].color, factor);
+                    }
+                }
+                return sorted[0].color;
+            }
+
+            interpolateOpacityAt(pos) {
+                const sorted = [...this.opacityStops].sort((a,b) => a.pos - b.pos);
+                if (pos <= sorted[0].pos) return sorted[0].opacity;
+                if (pos >= sorted[sorted.length-1].pos) return sorted[sorted.length-1].opacity;
+
+                for (let i = 0; i < sorted.length - 1; i++) {
+                    if (pos >= sorted[i].pos && pos <= sorted[i+1].pos) {
+                        const factor = (pos - sorted[i].pos) / (sorted[i+1].pos - sorted[i].pos);
+                        return sorted[i].opacity + factor * (sorted[i+1].opacity - sorted[i].opacity);
+                    }
+                }
+                return sorted[0].opacity;
+            }
+
+            blendColors(c1, c2, factor) {
+                // Simple color interpolation fallback
+                return c1; // returns discrete stop for exact colorzilla precision
+            }
+
+            applyOpacityToColor(colorStr, opacity) {
+                // Returns calculated RGBA object
+                let hex = this.toHex(colorStr).replace('#', '');
+                if (hex.length === 3) hex = hex.split('').map(x => x + x).join('');
+                const r = parseInt(hex.substring(0, 2), 16) || 0;
+                const g = parseInt(hex.substring(2, 4), 16) || 0;
+                const b = parseInt(hex.substring(4, 6), 16) || 0;
+                return { r, g, b, a: opacity };
+            }
+
+            toHex(color) {
+                if (color.startsWith('#')) return color;
+                if (color === 'red') return '#ff0000';
+                if (color === 'yellow') return '#ffff00';
+                if (color === 'green') return '#008000';
+                if (color === 'cyan') return '#00ffff';
+                if (color === 'blue') return '#0000ff';
+                return '#000000';
+            }
+
+            formatColor(rgbaObj) {
+                const { r, g, b, a } = rgbaObj;
+                if (this.colorFormat === 'rgb') {
+                    return a < 1 ? `rgba(${r}, ${g}, ${b}, ${a.toFixed(2)})` : `rgb(${r}, ${g}, ${b})`;
+                } else if (this.colorFormat === 'hsl') {
+                    // RGB to HSL conversion
+                    const rN = r / 255, gN = g / 255, bN = b / 255;
+                    const max = Math.max(rN, gN, bN), min = Math.min(rN, gN, bN);
+                    let h, s, l = (max + min) / 2;
+                    if (max === min) { h = s = 0; } else {
+                        const d = max - min;
+                        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                        switch(max) {
+                            case rN: h = (gN - bN) / d + (gN < bN ? 6 : 0); break;
+                            case gN: h = (bN - rN) / d + 2; break;
+                            case bN: h = (rN - gN) / d + 4; break;
+                        }
+                        h /= 6;
+                    }
+                    const hDeg = Math.round(h * 360), sPct = Math.round(s * 100), lPct = Math.round(l * 100);
+                    return a < 1 ? `hsla(${hDeg}, ${sPct}%, ${lPct}%, ${a.toFixed(2)})` : `hsl(${hDeg}, ${sPct}%, ${lPct}%)`;
+                } else {
+                    // HEX / HEXA
+                    const hexR = r.toString(16).padStart(2, '0');
+                    const hexG = g.toString(16).padStart(2, '0');
+                    const hexB = b.toString(16).padStart(2, '0');
+                    if (a < 1) {
+                        const hexA = Math.round(a * 255).toString(16).padStart(2, '0');
+                        return `#${hexR}${hexG}${hexB}${hexA}`;
+                    }
+                    return `#${hexR}${hexG}${hexB}`;
+                }
+            }
+
+            generateGradientString(config = this) {
+                const stops = config.getCombinedStops ? config.getCombinedStops() : this.getCombinedStopsForConfig(config);
+                const stopStrings = stops.map(s => `${this.formatColor(s.rgba)} ${s.pos}%`).join(', ');
+
+                if (config.type === 'radial') {
+                    return `radial-gradient(circle at center, ${stopStrings})`;
+                } else if (config.type === 'conic') {
+                    return `conic-gradient(from ${config.angle}deg at 50% 50%, ${stopStrings})`;
+                } else {
+                    return `linear-gradient(${config.angle}deg, ${stopStrings})`;
+                }
+            }
+
+            getCombinedStopsForConfig(cfg) {
+                // Helper for static presets rendering
+                return cfg.colorStops.map(cs => {
+                    const op = cfg.opacityStops ? cfg.opacityStops[0].opacity : 1;
+                    return { pos: cs.pos, rgba: this.applyOpacityToColor(cs.color, op) };
+                });
+            }
+
+            updateType(val) {
+                this.type = val;
+                const angleGroup = document.getElementById('angle-control-group');
+                angleGroup.style.display = val === 'radial' ? 'none' : 'block';
+                this.updateCSS();
+            }
+
+            updateAngle(val) {
+                this.angle = val;
+                document.getElementById('angle-value-display').innerText = `${val} deg`;
+                this.updateCSS();
+            }
+
+            updateFormat(val) {
+                this.colorFormat = val;
+                this.updateCSS();
+            }
+
+            toggleSCSS() {
+                this.useSCSS = !this.useSCSS;
+                document.getElementById('btn-scss-toggle').innerText = `SCSS: ${this.useSCSS ? 'ON' : 'OFF'}`;
+                this.updateCSS();
+            }
+
+            reverseStops() {
+                this.colorStops.forEach(s => s.pos = 100 - s.pos);
+                this.opacityStops.forEach(s => s.pos = 100 - s.pos);
+                this.renderRamp();
+                this.updateCSS();
+            }
+
+            randomize() {
+                const randColor = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+                this.colorStops = [
+                    { id: 1, pos: 0, color: randColor() },
+                    { id: 2, pos: 50, color: randColor() },
+                    { id: 3, pos: 100, color: randColor() }
+                ];
+                this.renderRamp();
+                this.updateCSS();
+            }
+
+            saveCustomPreset() {
+                const name = document.getElementById('preset-name-input').value || 'Custom Gradient';
+                const newPreset = {
+                    name,
+                    type: this.type,
+                    angle: this.angle,
+                    colorStops: JSON.parse(JSON.stringify(this.colorStops)),
+                    opacityStops: JSON.parse(JSON.stringify(this.opacityStops))
+                };
+                this.presets.unshift(newPreset);
+                this.renderPresetsGrid();
+                showToast("Preset Saved!", `Added "${name}" to your gradient library.`);
+            }
+
+            openImportModal() { document.getElementById('import-modal').classList.remove('hidden'); document.getElementById('import-modal').classList.add('flex'); }
+            closeImportModal() { document.getElementById('import-modal').classList.add('hidden'); document.getElementById('import-modal').classList.remove('flex'); }
+            
+            processImport() {
+                const str = document.getElementById('import-css-input').value;
+                if (str.includes('linear-gradient')) {
+                    this.type = 'linear';
+                } else if (str.includes('radial-gradient')) {
+                    this.type = 'radial';
+                }
+                // Quick fallback applied
+                this.closeImportModal();
+                showToast("CSS Imported", "Applied imported gradient parameters.");
+            }
+
+            toggleCheckerboard() {
+                document.getElementById('gradient-preview-container').classList.toggle('checkerboard-bg');
+            }
+
+            updateCSS() {
+                const gradStr = this.generateGradientString();
+                const preview = document.getElementById('main-gradient-preview');
+                preview.style.background = gradStr;
+
+                const codeBox = document.getElementById('gradient-css-output');
+                if (this.useSCSS) {
+                    codeBox.value = `$gradient-bg: ${gradStr};\n\n.my-element {\n  background: $gradient-bg;\n}`;
+                } else {
+                    codeBox.value = `/* Fallback for older browsers */\nbackground: ${this.colorStops[0].color};\n\n/* Modern Gradient */\nbackground: ${gradStr};`;
+                }
+            }
+        }
+
+
+        /* ========================================== */
+        /* MODULE 2: CSS SHAPES GENERATOR LOGIC       */
+        /* ========================================== */
+        class ShapesGenerator {
+            constructor() {
+                this.shapes = {
+                    'triangle-up': {
+                        title: 'Triangle Up',
+                        params: { width: 100, color: '#6366f1' },
+                        render: (p) => `<div style="width: 0; height: 0; border-left: ${p.width/2}px solid transparent; border-right: ${p.width/2}px solid transparent; border-bottom: ${p.width}px solid ${p.color};"></div>`,
+                        css: (p) => `width: 0;\nheight: 0;\nborder-left: ${p.width/2}px solid transparent;\nborder-right: ${p.width/2}px solid transparent;\nborder-bottom: ${p.width}px solid ${p.color};`
+                    },
+                    'triangle-down': {
+                        title: 'Triangle Down',
+                        params: { width: 100, color: '#6366f1' },
+                        render: (p) => `<div style="width: 0; height: 0; border-left: ${p.width/2}px solid transparent; border-right: ${p.width/2}px solid transparent; border-top: ${p.width}px solid ${p.color};"></div>`,
+                        css: (p) => `width: 0;\nheight: 0;\nborder-left: ${p.width/2}px solid transparent;\nborder-right: ${p.width/2}px solid transparent;\nborder-top: ${p.width}px solid ${p.color};`
+                    },
+                    'trapezoid': {
+                        title: 'Trapezoid',
+                        params: { topWidth: 100, bottomWidth: 180, height: 80, color: '#38ef7d' },
+                        render: (p) => `<div style="border-bottom: ${p.height}px solid ${p.color}; border-left: ${(p.bottomWidth-p.topWidth)/2}px solid transparent; border-right: ${(p.bottomWidth-p.topWidth)/2}px solid transparent; height: 0; width: ${p.topWidth}px;"></div>`,
+                        css: (p) => `height: 0;\nwidth: ${p.topWidth}px;\nborder-bottom: ${p.height}px solid ${p.color};\nborder-left: ${(p.bottomWidth-p.topWidth)/2}px solid transparent;\nborder-right: ${(p.bottomWidth-p.topWidth)/2}px solid transparent;`
+                    },
+                    'parallelogram': {
+                        title: 'Parallelogram',
+                        params: { width: 140, height: 90, skew: 20, color: '#f72585' },
+                        render: (p) => `<div style="width: ${p.width}px; height: ${p.height}px; transform: skew(${p.skew}deg); background: ${p.color};"></div>`,
+                        css: (p) => `width: ${p.width}px;\nheight: ${p.height}px;\ntransform: skew(${p.skew}deg);\nbackground: ${p.color};`
+                    },
+                    'star-6': {
+                        title: '6-Point Star',
+                        params: { size: 100, color: '#eab308' },
+                        render: (p) => `<div style="position: relative; width: 0; height: 0; border-left: ${p.size/2}px solid transparent; border-right: ${p.size/2}px solid transparent; border-bottom: ${p.size}px solid ${p.color};"><div style="position: absolute; top: ${p.size/3}px; left: -${p.size/2}px; width: 0; height: 0; border-left: ${p.size/2}px solid transparent; border-right: ${p.size/2}px solid transparent; border-top: ${p.size}px solid ${p.color};"></div></div>`,
+                        css: (p) => `.star-6 {\n  width: 0;\n  height: 0;\n  border-left: ${p.size/2}px solid transparent;\n  border-right: ${p.size/2}px solid transparent;\n  border-bottom: ${p.size}px solid ${p.color};\n  position: relative;\n}\n.star-6::after {\n  content: "";\n  position: absolute;\n  top: ${p.size/3}px;\n  left: -${p.size/2}px;\n  width: 0;\n  height: 0;\n  border-left: ${p.size/2}px solid transparent;\n  border-right: ${p.size/2}px solid transparent;\n  border-top: ${p.size}px solid ${p.color};\n}`
+                    },
+                    'speech-bubble': {
+                        title: 'Speech Bubble',
+                        params: { width: 160, height: 90, color: '#3b82f6', radius: 10 },
+                        render: (p) => `<div style="width: ${p.width}px; height: ${p.height}px; background: ${p.color}; border-radius: ${p.radius}px; position: relative;"><div style="position: absolute; bottom: -12px; left: 20px; width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 12px solid ${p.color};"></div></div>`,
+                        css: (p) => `.speech-bubble {\n  width: ${p.width}px;\n  height: ${p.height}px;\n  background: ${p.color};\n  border-radius: ${p.radius}px;\n  position: relative;\n}\n.speech-bubble::after {\n  content: "";\n  position: absolute;\n  bottom: -12px;\n  left: 20px;\n  border-left: 12px solid transparent;\n  border-right: 12px solid transparent;\n  border-top: 12px solid ${p.color};\n}`
+                    },
+                    'pacman': {
+                        title: 'Pac-Man',
+                        params: { size: 100, color: '#facc15' },
+                        render: (p) => `<div style="width: 0; height: 0; border-right: ${p.size/2}px solid transparent; border-top: ${p.size/2}px solid ${p.color}; border-left: ${p.size/2}px solid ${p.color}; border-bottom: ${p.size/2}px solid ${p.color}; border-radius: ${p.size/2}px;"></div>`,
+                        css: (p) => `width: 0;\nheight: 0;\nborder-right: ${p.size/2}px solid transparent;\nborder-top: ${p.size/2}px solid ${p.color};\nborder-left: ${p.size/2}px solid ${p.color};\nborder-bottom: ${p.size/2}px solid ${p.color};\nborder-radius: 50%;`
+                    },
+                    'badge': {
+                        title: 'Ribbon Badge',
+                        params: { width: 120, height: 80, color: '#ec4899' },
+                        render: (p) => `<div style="width: ${p.width}px; height: ${p.height}px; background: ${p.color}; position: relative; clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 50% 80%, 0% 100%);"></div>`,
+                        css: (p) => `width: ${p.width}px;\nheight: ${p.height}px;\nbackground: ${p.color};\nclip-path: polygon(0% 0%, 100% 0%, 100% 100%, 50% 80%, 0% 100%);`
+                    }
+                };
+
+                this.activeKey = 'triangle-up';
+                this.init();
+            }
+
+            init() {
+                this.renderCatalog();
+                this.loadShape(this.activeKey);
+            }
+
+            renderCatalog() {
+                const grid = document.getElementById('shapes-catalog-grid');
+                grid.innerHTML = '';
+                Object.keys(this.shapes).forEach(key => {
+                    const item = this.shapes[key];
+                    const card = document.createElement('button');
+                    card.className = `p-3 bg-slate-900 border ${key === this.activeKey ? 'border-brand-500' : 'border-slate-700'} rounded-lg flex flex-col items-center justify-center gap-2 hover:border-brand-400 transition group`;
+                    
+                    card.innerHTML = `
+                        <div class="h-10 flex items-center justify-center scale-50 transform pointer-events-none">
+                            ${item.render(item.params)}
+                        </div>
+                        <span class="text-[11px] text-slate-300 font-medium group-hover:text-white">${item.title}</span>
+                    `;
+
+                    card.onclick = () => {
+                        this.activeKey = key;
+                        this.renderCatalog();
+                        this.loadShape(key);
+                    };
+
+                    grid.appendChild(card);
+                });
+            }
+
+            loadShape(key) {
+                const shape = this.shapes[key];
+                document.getElementById('current-shape-title').innerText = shape.title;
+                
+                // Render Visualizer
+                document.getElementById('active-shape-element').innerHTML = shape.render(shape.params);
+                document.getElementById('shape-css-output').value = shape.css(shape.params);
+
+                // Build Controls
+                const ctrlContainer = document.getElementById('shape-controls-container');
+                ctrlContainer.innerHTML = '';
+
+                Object.keys(shape.params).forEach(pKey => {
+                    const val = shape.params[pKey];
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'space-y-1';
+
+                    if (pKey === 'color') {
+                        wrapper.innerHTML = `
+                            <label class="text-slate-400 capitalize">${pKey}:</label>
+                            <input type="color" value="${val}" class="w-full h-8 bg-transparent cursor-pointer rounded">
+                        `;
+                        wrapper.querySelector('input').oninput = (e) => {
+                            shape.params[pKey] = e.target.value;
+                            this.updateActiveShape();
+                        };
+                    } else {
+                        wrapper.innerHTML = `
+                            <div class="flex justify-between text-slate-400">
+                                <span class="capitalize">${pKey}:</span>
+                                <span>${val}px</span>
+                            </div>
+                            <input type="range" min="10" max="250" value="${val}" class="w-full accent-brand-500">
+                        `;
+                        wrapper.querySelector('input').oninput = (e) => {
+                            shape.params[pKey] = Number(e.target.value);
+                            wrapper.querySelector('span:last-child').innerText = `${e.target.value}px`;
+                            this.updateActiveShape();
+                        };
+                    }
+
+                    ctrlContainer.appendChild(wrapper);
+                });
+            }
+
+            updateActiveShape() {
+                const shape = this.shapes[this.activeKey];
+                document.getElementById('active-shape-element').innerHTML = shape.render(shape.params);
+                document.getElementById('shape-css-output').value = shape.css(shape.params);
+            }
+        }
+
+
+        /* ========================================== */
+        /* MODULE 3: CLIP PATH GENERATOR LOGIC        */
+        /* ========================================== */
+        class ClipPathGenerator {
+            constructor() {
+                this.templates = {
+                    'triangle': { name: 'Triangle', type: 'polygon', points: [{x:50, y:0}, {x:0, y:100}, {x:100, y:100}] },
+                    'trapezoid': { name: 'Trapezoid', type: 'polygon', points: [{x:20, y:0}, {x:80, y:0}, {x:100, y:100}, {x:0, y:100}] },
+                    'pentagon': { name: 'Pentagon', type: 'polygon', points: [{x:50, y:0}, {x:100, y:38}, {x:82, y:100}, {x:18, y:100}, {x:0, y:38}] },
+                    'hexagon': { name: 'Hexagon', type: 'polygon', points: [{x:25, y:0}, {x:75, y:0}, {x:100, y:50}, {x:75, y:100}, {x:25, y:100}, {x:0, y:50}] },
+                    'star': { name: 'Star', type: 'polygon', points: [{x:50, y:0}, {x:61, y:35}, {x:98, y:35}, {x:68, y:57}, {x:79, y:91}, {x:50, y:70}, {x:21, y:91}, {x:32, y:57}, {x:2, y:35}, {x:39, y:35}] },
+                    'message': { name: 'Message Bubble', type: 'polygon', points: [{x:0, y:0}, {x:100, y:0}, {x:100, y:75}, {x:75, y:75}, {x:75, y:100}, {x:50, y:75}, {x:0, y:75}] },
+                    'rhombus': { name: 'Rhombus', type: 'polygon', points: [{x:50, y:0}, {x:100, y:50}, {x:50, y:100}, {x:0, y:50}] },
+                    'frame': { name: 'Frame', type: 'polygon', points: [{x:0, y:0}, {x:0, y:100}, {x:25, y:100}, {x:25, y:25}, {x:75, y:25}, {x:75, y:75}, {x:25, y:75}, {x:25, y:100}, {x:100, y:100}, {x:100, y:0}] }
+                };
+
+                this.currentPoints = JSON.parse(JSON.stringify(this.templates['pentagon'].points));
+                this.bgType = 'image';
+                this.init();
+            }
+
+            init() {
+                this.renderTemplates();
+                this.updateBg();
+                this.renderHandles();
+                this.updateCSS();
+            }
+
+            renderTemplates() {
+                const grid = document.getElementById('clip-templates-grid');
+                grid.innerHTML = '';
+                Object.keys(this.templates).forEach(key => {
+                    const tmpl = this.templates[key];
+                    const btn = document.createElement('button');
+                    btn.className = 'p-2 bg-slate-900 border border-slate-700 hover:border-brand-500 rounded text-xs text-slate-300 hover:text-white transition flex items-center justify-between';
+                    btn.innerHTML = `<span>${tmpl.name}</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>`;
+                    btn.onclick = () => {
+                        this.currentPoints = JSON.parse(JSON.stringify(tmpl.points));
+                        this.renderHandles();
+                        this.updateCSS();
+                    };
+                    grid.appendChild(btn);
+                });
+            }
+
+            renderHandles() {
+                const layer = document.getElementById('clip-handles-layer');
+                layer.innerHTML = '';
+                document.getElementById('clip-points-count').innerText = this.currentPoints.length;
+
+                this.currentPoints.forEach((pt, index) => {
+                    const handle = document.createElement('div');
+                    handle.className = 'clip-point';
+                    handle.style.left = `${pt.x}%`;
+                    handle.style.top = `${pt.y}%`;
+
+                    // Drag handles
+                    handle.onmousedown = (e) => {
+                        e.preventDefault();
+                        const container = document.getElementById('clip-target-box');
+                        const rect = container.getBoundingClientRect();
+
+                        const onMouseMove = (moveEv) => {
+                            let x = Math.round(((moveEv.clientX - rect.left) / rect.width) * 100);
+                            let y = Math.round(((moveEv.clientY - rect.top) / rect.height) * 100);
+                            x = Math.max(0, Math.min(100, x));
+                            y = Math.max(0, Math.min(100, y));
+
+                            pt.x = x;
+                            pt.y = y;
+                            handle.style.left = `${x}%`;
+                            handle.style.top = `${y}%`;
+                            this.updateCSS();
+                        };
+
+                        const onMouseUp = () => {
+                            document.removeEventListener('mousemove', onMouseMove);
+                            document.removeEventListener('mouseup', onMouseUp);
+                        };
+
+                        document.addEventListener('mousemove', onMouseMove);
+                        document.addEventListener('mouseup', onMouseUp);
+                    };
+
+                    layer.appendChild(handle);
+                });
+            }
+
+            addPoint() {
+                // Insert midpoint between first two points
+                const p1 = this.currentPoints[0];
+                const p2 = this.currentPoints[1] || { x: 50, y: 50 };
+                this.currentPoints.push({ x: Math.round((p1.x + p2.x)/2), y: Math.round((p1.y + p2.y)/2) });
+                this.renderHandles();
+                this.updateCSS();
+            }
+
+            removePoint() {
+                if (this.currentPoints.length > 3) {
+                    this.currentPoints.pop();
+                    this.renderHandles();
+                    this.updateCSS();
+                }
+            }
+
+            changeBgType(val) {
+                this.bgType = val;
+                document.getElementById('clip-bg-color-picker').classList.toggle('hidden', val !== 'solid');
+                document.getElementById('clip-bg-image-url').classList.toggle('hidden', val !== 'image');
+                this.updateBg();
+            }
+
+            updateBg() {
+                const target = document.getElementById('clip-target-element');
+                if (this.bgType === 'image') {
+                    const url = document.getElementById('clip-image-input').value;
+                    target.style.background = `url("${url}") center/cover no-repeat`;
+                } else if (this.bgType === 'gradient') {
+                    target.style.background = `linear-gradient(135deg, #6366f1 0%, #ec4899 100%)`;
+                } else {
+                    const col = document.getElementById('clip-solid-color').value;
+                    target.style.background = col;
+                }
+            }
+
+            updateCSS() {
+                const polyStr = this.currentPoints.map(p => `${p.x}% ${p.y}%`).join(', ');
+                const clipRule = `clip-path: polygon(${polyStr});`;
+                
+                document.getElementById('clip-target-element').style.clipPath = `polygon(${polyStr})`;
+                document.getElementById('clippath-css-output').value = `-webkit-clip-path: polygon(${polyStr});\n${clipRule}`;
+            }
+        }
+
+        // Initialize Applications on Load
+        let gradientApp, shapesApp, clipPathApp;
+        window.onload = () => {
+            gradientApp = new GradientGenerator();
+            shapesApp = new ShapesGenerator();
+            clipPathApp = new ClipPathGenerator();
+        };
+    </script>
+</body>
+</html>
