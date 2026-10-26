@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Sale & Relocation Financial Dashboard</title>
+    <title>Interactive Financial Analysis & Relocation Dashboard</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -24,21 +24,19 @@
             }
         }
     </script>
-    <!-- FontAwesome & Lucide Icons -->
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js for Visualizations -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .input-accent {
+            transition: all 0.2s ease;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-        }
-        .dark .glass-card {
-            background: rgba(30, 41, 59, 0.85);
+        .input-accent:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(3, 105, 161, 0.2);
         }
     </style>
 </head>
@@ -49,545 +47,360 @@
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3">
                 <div class="p-2.5 bg-blue-600 text-white rounded-xl shadow-md shadow-blue-500/20">
-                    <i class="fa-solid me-0 fa-chart-line text-xl"></i>
+                    <i class="fa-solid fa-calculator text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Home Sale & Relocation Report</h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Analysis: Current Home Sale vs. Vero Beach Purchase</p>
+                    <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Interactive Home Sale & Purchase Dashboard</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Real-Time Financial Simulator • Relocation to Vero Beach</p>
                 </div>
             </div>
 
-            <!-- Header Controls -->
+            <!-- Controls -->
             <div class="flex items-center gap-3">
-                <!-- Mortgage Toggle Switch -->
-                <div class="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex items-center border border-slate-200 dark:border-slate-700 text-xs font-medium">
-                    <button id="btn-360k" onclick="setMortgageMode(360000)" class="px-3 py-1.5 rounded-lg transition-all text-slate-600 dark:text-slate-300">
-                        Screenshot ($360k)
-                    </button>
-                    <button id="btn-363k" onclick="setMortgageMode(363000)" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400 font-semibold transition-all">
-                        Actual ($363k)
-                    </button>
-                </div>
-
-                <!-- Dark Mode Toggle -->
-                <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                <button onclick="resetDefaults()" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-left"></i> Reset Defaults
+                </button>
+                <button onclick="toggleDarkMode()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
                     <i id="theme-icon" class="fa-solid fa-moon text-base"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Container -->
+    <!-- Main Content Container -->
     <main class="max-w-7xl mx-auto px-4 lg:px-8 py-8 space-y-8">
 
-        <!-- Executive Summary KPI Grid -->
+        <!-- Executive Dynamic KPI Summary Banner -->
         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
 
-            <!-- Card 1: Desired Sale Price -->
+            <!-- KPI 1: Sale Price -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/80 shadow-sm relative overflow-hidden group">
-                <div class="absolute -right-3 -bottom-3 text-emerald-500/10 dark:text-emerald-500/5 group-hover:scale-110 transition-transform">
-                    <i class="fa-solid fa-house-circle-check text-8xl"></i>
-                </div>
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Current Sale Price</span>
-                    <span class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 text-xs font-bold">Planned</span>
+                    <span class="p-1.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 text-xs"><i class="fa-solid fa-house"></i></span>
                 </div>
-                <div class="text-3xl font-extrabold text-slate-900 dark:text-white mb-1" id="kpi-sale-price">$455,000</div>
-                <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                    <i class="fa-solid fa-circle-info text-emerald-500"></i> Selling Costs: <span class="font-semibold text-slate-700 dark:text-slate-300">$32,375 (7.12%)</span>
+                <div class="text-3xl font-black text-slate-900 dark:text-white mb-1" id="kpi-sale-price">$455,000</div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 flex justify-between">
+                    <span>Est. Selling Costs:</span>
+                    <span class="font-bold text-slate-700 dark:text-slate-300" id="kpi-selling-costs">$35,375</span>
                 </p>
             </div>
 
-            <!-- Card 2: Estimated Net Proceeds -->
+            <!-- KPI 2: Net Proceeds -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/80 shadow-sm relative overflow-hidden group">
-                <div class="absolute -right-3 -bottom-3 text-emerald-500/10 dark:text-emerald-500/5 group-hover:scale-110 transition-transform">
-                    <i class="fa-solid fa-hand-holding-dollar text-8xl"></i>
-                </div>
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Est. Net Proceeds</span>
-                    <span id="proceeds-badge" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
-                        Mortgage: $363,000
-                    </span>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Net Proceeds</span>
+                    <span class="p-1.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 text-xs font-bold">Equity</span>
                 </div>
-                <div class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mb-1" id="kpi-net-proceeds">$59,625</div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">
-                    Screenshot Baseline: <span class="line-through text-slate-400">$62,625</span> (at $360k)
+                <div class="text-3xl font-black text-emerald-600 dark:text-emerald-400 mb-1" id="kpi-net-proceeds">$59,625</div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 flex justify-between">
+                    <span>Mortgage Balance:</span>
+                    <span class="font-bold text-slate-700 dark:text-slate-300" id="kpi-mortgage-display">$360,000</span>
                 </p>
             </div>
 
-            <!-- Card 3: Vero Beach Target Price -->
+            <!-- KPI 3: New Home Price -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/80 shadow-sm relative overflow-hidden group">
-                <div class="absolute -right-3 -bottom-3 text-blue-500/10 dark:text-blue-500/5 group-hover:scale-110 transition-transform">
-                    <i class="fa-solid fa-location-dot text-8xl"></i>
-                </div>
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">New Purchase (Vero)</span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300">Price Cut -$9.1K</span>
+                    <span class="p-1.5 rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 text-xs"><i class="fa-solid fa-location-dot"></i></span>
                 </div>
-                <div class="text-3xl font-extrabold text-slate-900 dark:text-white mb-1">$289,900</div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">
-                    Down Payment: <span class="font-semibold text-slate-700 dark:text-slate-300" id="kpi-downpayment">$30,000 (10.35%)</span>
+                <div class="text-3xl font-black text-slate-900 dark:text-white mb-1" id="kpi-purchase-price">$289,900</div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 flex justify-between">
+                    <span>Down Payment:</span>
+                    <span class="font-bold text-slate-700 dark:text-slate-300" id="kpi-dp-display">$30,000 (10.35%)</span>
                 </p>
             </div>
 
-            <!-- Card 4: Net Cash Remaining -->
+            <!-- KPI 4: Est Monthly Payment -->
             <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-5 text-white shadow-lg shadow-blue-500/20 relative overflow-hidden">
-                <div class="absolute -right-4 -bottom-4 text-white/10">
-                    <i class="fa-solid fa-piggy-bank text-8xl"></i>
-                </div>
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-blue-100">Liquid Cash Left</span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white backdrop-blur">After Down Payment</span>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-blue-100">Est. Monthly Payment</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white backdrop-blur">P&I + Taxes/Ins</span>
                 </div>
-                <div class="text-3xl font-black mb-1" id="kpi-net-remaining">$29,625</div>
-                <p class="text-xs text-blue-100/90 flex items-center justify-between">
-                    <span>Est. Closing Costs: <strong>$10,100</strong></span>
+                <div class="text-3xl font-black mb-1" id="kpi-monthly-payment">$2,297 <span class="text-xs font-normal opacity-80">/mo</span></div>
+                <p class="text-xs text-blue-100/90 flex justify-between">
+                    <span>Net Cash Left:</span>
+                    <span class="font-bold text-emerald-300" id="kpi-net-cash-display">$19,525</span>
                 </p>
             </div>
         </section>
 
-        <!-- SECTION 1: HOME SALE ANALYSIS (Screenshot 2026-10-25 at 9.23.50 PM.png) -->
-        <section class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden">
-            <div class="border-b border-slate-100 dark:border-slate-700/60 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/50">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-1 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-xs font-bold">Step 1</span>
-                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Current Home Sale Breakdown & Net Proceeds</h2>
-                    </div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                        Based on listing for <strong>$455,000</strong> with full cost items breakdown
-                    </p>
-                </div>
+        <!-- INPUT CONTROLS & SALE ANALYSIS GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-                <!-- Mortgage Adjustment Interactive Pill -->
-                <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 rounded-xl p-3 flex items-center gap-3 text-xs">
-                    <i class="fa-solid fa-triangle-exclamation text-amber-500 text-base"></i>
-                    <div>
-                        <div class="font-semibold text-amber-900 dark:text-amber-200">Mortgage Balance Comparison</div>
-                        <div class="text-amber-700 dark:text-amber-400">
-                            Screenshot assumes <span class="font-bold">$360,000</span> | Actual balance: <span class="font-bold">$363,000</span> (+$3,000)
+            <!-- LEFT PANEL: Dynamic Control Dashboard -->
+            <div class="lg:col-span-5 space-y-6">
+
+                <!-- Sale Configuration Inputs -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm p-6 space-y-5">
+                    <div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-xs font-bold">1</span>
+                        <h2 class="font-bold text-slate-900 dark:text-white">Current Home Sale Inputs</h2>
+                    </div>
+
+                    <!-- Desired Selling Price Input -->
+                    <div class="space-y-1.5">
+                        <label for="inputSellingPrice" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                            Desired Selling Price ($)
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-bold">$</span>
+                            <input type="number" id="inputSellingPrice" value="455000" step="1000" oninput="recalculateAll()"
+                                   class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-bold input-accent">
+                        </div>
+                    </div>
+
+                    <!-- Mortgage Balance Input -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center">
+                            <label for="inputMortgage" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                                Remaining Mortgage Owed ($)
+                            </label>
+                            <div class="flex gap-1 text-[11px]">
+                                <button onclick="setMortgage(360000)" class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-600 dark:text-slate-300 font-medium">$360k</button>
+                                <button onclick="setMortgage(363000)" class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-600 dark:text-slate-300 font-medium">$363k</button>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-bold">$</span>
+                            <input type="number" id="inputMortgage" value="360000" step="1000" oninput="recalculateAll()"
+                                   class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-bold input-accent">
+                        </div>
+                    </div>
+
+                    <!-- Closing Fee Breakdown Accordion/Inputs -->
+                    <div class="pt-2 border-t border-slate-100 dark:border-slate-700/60 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Selling Cost Rates</span>
+                            <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400" id="totalSellingCostRate">7.12% + Prep</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 text-xs">
+                            <div>
+                                <label class="text-slate-500">Agent Commission (%)</label>
+                                <input type="number" id="rateCommission" value="3.96" step="0.01" oninput="recalculateAll()"
+                                       class="w-full mt-1 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 font-medium">
+                            </div>
+                            <div>
+                                <label class="text-slate-500">Selling Concessions (%)</label>
+                                <input type="number" id="rateConcessions" value="1.00" step="0.01" oninput="recalculateAll()"
+                                       class="w-full mt-1 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 font-medium">
+                            </div>
+                            <div>
+                                <label class="text-slate-500">Prep & Repairs ($)</label>
+                                <input type="number" id="costPrep" value="2000" step="100" oninput="recalculateAll()"
+                                       class="w-full mt-1 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 font-medium">
+                            </div>
+                            <div>
+                                <label class="text-slate-500">Moving Costs ($)</label>
+                                <input type="number" id="costMoving" value="1000" step="100" oninput="recalculateAll()"
+                                       class="w-full mt-1 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 font-medium">
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Purchase Configuration Inputs -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm p-6 space-y-5">
+                    <div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 text-xs font-bold">2</span>
+                        <h2 class="font-bold text-slate-900 dark:text-white">New Purchase Inputs (Vero Beach)</h2>
+                    </div>
+
+                    <!-- Purchase Price Input -->
+                    <div class="space-y-1.5">
+                        <label for="inputPurchasePrice" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                            New Purchase Price ($)
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-bold">$</span>
+                            <input type="number" id="inputPurchasePrice" value="289900" step="500" oninput="recalculateAll()"
+                                   class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-bold input-accent">
+                        </div>
+                    </div>
+
+                    <!-- Down Payment Input & Range Slider -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label for="inputDownPayment" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                                Down Payment ($)
+                            </label>
+                            <span class="text-xs font-bold text-blue-600 dark:text-blue-400" id="dpPercentDisplay">10.35%</span>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-bold">$</span>
+                            <input type="number" id="inputDownPayment" value="30000" step="500" oninput="syncDpFromInput()"
+                                   class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-bold input-accent">
+                        </div>
+                        <input id="sliderDownPayment" type="range" min="5000" max="100000" step="1000" value="30000" oninput="syncDpFromSlider()"
+                               class="w-full h-2 bg-blue-200 dark:bg-blue-900 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                    </div>
+
+                    <!-- Loan Rate & Closing Costs -->
+                    <div class="grid grid-cols-2 gap-3 text-xs pt-2 border-t border-slate-100 dark:border-slate-700/60">
+                        <div>
+                            <label class="text-slate-500 font-semibold">Interest Rate (%)</label>
+                            <input type="number" id="inputInterestRate" value="6.85" step="0.05" oninput="recalculateAll()"
+                                   class="w-full mt-1 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 font-bold">
+                        </div>
+                        <div>
+                            <label class="text-slate-500 font-semibold">Est. Closing Costs ($)</label>
+                            <input type="number" id="inputClosingCosts" value="10100" step="100" oninput="recalculateAll()"
+                                   class="w-full mt-1 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 font-bold">
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
-            <div class="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <!-- Left Details Grid -->
-                <div class="lg:col-span-7 space-y-6">
-                    
-                    <!-- Sale & Mortgage Input Section -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200/60 dark:border-slate-700">
-                            <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Desired Selling Price</label>
-                            <div class="text-xl font-bold text-slate-900 dark:text-white mt-1">$455,000</div>
-                        </div>
-                        <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200/60 dark:border-slate-700 relative">
-                            <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Remaining Mortgage Owed</label>
-                            <div class="text-xl font-bold text-slate-900 dark:text-white mt-1" id="display-mortgage-owed">$363,000</div>
-                            <span class="absolute top-3 right-3 text-[10px] font-bold text-slate-400" id="mortgage-tag">Actual</span>
-                        </div>
+            <!-- RIGHT PANEL: Live Analysis, Charts & Cash Flow -->
+            <div class="lg:col-span-7 space-y-6">
+
+                <!-- Home Sale Net Proceeds Breakdown Card -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm p-6 space-y-6">
+                    <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <h2 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-emerald-500"></i> Net Sale Proceeds Breakdown
+                        </h2>
+                        <span class="text-xs text-slate-400">Auto-Calculated</span>
                     </div>
 
-                    <!-- Cost Breakdown List -->
-                    <div class="space-y-4">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Itemized Deductions & Fees</h3>
-
-                        <!-- Cost Item 1: Prep & Repair -->
-                        <div class="p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/40 space-y-2">
-                            <div class="flex justify-between items-center text-sm font-semibold text-slate-800 dark:text-slate-200">
-                                <span class="flex items-center gap-2">
-                                    <i class="fa-solid fa-paint-roller text-blue-500 text-xs"></i> Cleaning & Prep Costs
-                                </span>
-                                <span>$2,000 <span class="text-xs text-slate-400 font-normal">(0.44%)</span></span>
-                            </div>
-                            <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5">
-                                <div class="bg-blue-500 h-1.5 rounded-full" style="width: 0.44%"></div>
-                            </div>
-                        </div>
-
-                        <!-- Cost Item 2: On-market costs -->
-                        <div class="p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/40 space-y-2">
-                            <div class="flex justify-between items-center text-sm font-semibold text-slate-800 dark:text-slate-200">
-                                <span class="flex items-center gap-2">
-                                    <i class="fa-solid fa-truck-ramp-box text-indigo-500 text-xs"></i> Moving Expenses
-                                </span>
-                                <span>$1,000 <span class="text-xs text-slate-400 font-normal">(0.22%)</span></span>
-                            </div>
-                            <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5">
-                                <div class="bg-indigo-500 h-1.5 rounded-full" style="width: 0.22%"></div>
-                            </div>
-                        </div>
-
-                        <!-- Cost Item 3: Closing Costs Grid -->
-                        <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 space-y-3">
-                            <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex justify-between">
-                                <span>Closing Costs Subtotal</span>
-                                <span class="text-slate-900 dark:text-white">$29,375</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3 text-xs">
-                                <div class="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900/60">
-                                    <div class="text-slate-500">Agent Commission (3.96%)</div>
-                                    <div class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">$18,000</div>
-                                </div>
-                                <div class="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900/60">
-                                    <div class="text-slate-500">Selling Concessions (1.00%)</div>
-                                    <div class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">$4,550</div>
-                                </div>
-                                <div class="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900/60">
-                                    <div class="text-slate-500">Closing Fees (0.50%)</div>
-                                    <div class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">$2,275</div>
-                                </div>
-                                <div class="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900/60">
-                                    <div class="text-slate-500">Taxes (1.00%)</div>
-                                    <div class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">$4,550</div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- Right Net Proceeds Summary Card -->
-                <div class="lg:col-span-5 flex flex-col justify-between bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700">
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">
-                            Calculated Net Proceeds
-                        </h3>
-
-                        <!-- Doughnut Chart Canvas -->
-                        <div class="relative h-48 w-full mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                        <div class="relative h-48 w-full">
                             <canvas id="saleChart"></canvas>
                         </div>
 
-                        <div class="space-y-2 text-sm border-t border-slate-200 dark:border-slate-700 pt-4">
-                            <div class="flex justify-between text-slate-600 dark:text-slate-300">
-                                <span>Desired Selling Price</span>
-                                <span class="font-semibold text-slate-900 dark:text-white">$455,000</span>
+                        <div class="space-y-3 text-xs">
+                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+                                <span class="text-slate-600 dark:text-slate-400 font-medium">Desired Sale Price:</span>
+                                <span class="font-bold text-slate-900 dark:text-white text-sm" id="calcSalePrice">$455,000</span>
                             </div>
-                            <div class="flex justify-between text-slate-600 dark:text-slate-300">
-                                <span>Less Mortgage Owed</span>
-                                <span class="font-semibold text-red-500" id="summary-mortgage">-$363,000</span>
+                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+                                <span class="text-slate-600 dark:text-slate-400 font-medium">Mortgage Payoff:</span>
+                                <span class="font-bold text-red-500 text-sm" id="calcMortgage">-$360,000</span>
                             </div>
-                            <div class="flex justify-between text-slate-600 dark:text-slate-300">
-                                <span>Less Est. Selling Costs (7.12%)</span>
-                                <span class="font-semibold text-red-500">-$32,375</span>
+                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+                                <span class="text-slate-600 dark:text-slate-400 font-medium">Total Selling Fees & Prep:</span>
+                                <span class="font-bold text-red-500 text-sm" id="calcSellingCosts">-$35,375</span>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex justify-between items-center">
+                                <span class="font-bold text-emerald-800 dark:text-emerald-300">Net Sale Proceeds:</span>
+                                <span class="font-black text-emerald-600 dark:text-emerald-400 text-base" id="calcNetProceeds">$59,625</span>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="mt-6 pt-4 border-t-2 border-slate-200 dark:border-slate-700 text-center bg-emerald-500/10 dark:bg-emerald-500/20 p-4 rounded-xl border border-emerald-500/30">
-                        <span class="text-xs font-semibold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">Final Net Proceeds to You</span>
-                        <div class="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1" id="summary-net-proceeds">$59,625</div>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                            (Exact screenshot proceeds was <strong>$62,625</strong> with $360,000 mortgage baseline)
-                        </p>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- SECTION 2 & 3: NEW HOME PURCHASE VERO BEACH & CASH REMAINING -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Cash Flow Waterfall Card -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm p-6 space-y-4">
+                    <h2 class="font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <i class="fa-solid fa-arrow-right-arrow-left text-blue-500"></i> Relocation Cash Flow & Reserves
+                    </h2>
 
-            <!-- Vero Beach Property Details Card (Screenshot Screenshot 2026-10-25 at 9.25.30 PM.png) -->
-            <div class="lg:col-span-7 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm p-6 space-y-6 flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2">
-                            <span class="px-2.5 py-1 rounded-md bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-xs font-bold">Step 2</span>
-                            <h2 class="text-lg font-bold text-slate-900 dark:text-white">Target Property: Vero Beach</h2>
+                    <div class="space-y-2.5 text-xs">
+                        <div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 flex justify-between items-center">
+                            <span class="font-medium text-emerald-900 dark:text-emerald-200">+ Net Proceeds from Sale</span>
+                            <span class="font-bold text-emerald-600 dark:text-emerald-400 text-sm" id="flowProceeds">$59,625</span>
                         </div>
-                        <span class="px-3 py-1 bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 rounded-full text-xs font-semibold">
-                            Accepting Backups
-                        </span>
-                    </div>
-
-                    <!-- Property Address Banner -->
-                    <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200/60 dark:border-slate-700 mb-6">
-                        <div class="flex justify-between items-start">
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+                            <span class="font-medium text-slate-600 dark:text-slate-400">- Down Payment for New Purchase</span>
+                            <span class="font-bold text-red-500 text-sm" id="flowDp">-$30,000</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 flex justify-between items-center font-bold">
+                            <span class="text-blue-900 dark:text-blue-200">Cash Left Before Purchase Closing Costs:</span>
+                            <span class="text-blue-600 dark:text-blue-400 text-sm" id="flowCashBeforeClosing">$29,625</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+                            <span class="font-medium text-slate-600 dark:text-slate-400">- Estimated Purchase Closing Costs</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-300 text-sm" id="flowClosingCosts">-$10,100</span>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-900 text-white flex justify-between items-center">
                             <div>
-                                <h3 class="text-xl font-extrabold text-slate-900 dark:text-white">6385 4TH Place</h3>
-                                <p class="text-sm text-slate-500 dark:text-slate-400">Vero Beach, FL 32968</p>
+                                <div class="font-bold text-emerald-400 text-sm">Remaining Liquid Cash Reserve</div>
+                                <div class="text-[10px] text-slate-400">Unrestricted capital remaining in hand</div>
                             </div>
-                            <div class="text-right">
-                                <div class="text-2xl font-black text-blue-600 dark:text-blue-400">$289,900</div>
-                                <div class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Price cut: $9.1K (10/6)</div>
+                            <div class="text-2xl font-black text-emerald-400" id="flowFinalReserve">$19,525</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Payment Real-time Breakdown -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm p-6 space-y-5">
+                    <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <div>
+                            <h2 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i class="fa-solid fa-house-medical text-purple-500"></i> Est. Monthly Payment Breakdown
+                            </h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Calculated using 30-yr fixed loan amortization</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-blue-600 dark:text-blue-400" id="calcTotalMonthly">$2,297</div>
+                            <div class="text-[10px] text-slate-400">Total Monthly Cost</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                        <div class="relative h-48 w-full">
+                            <canvas id="paymentChart"></canvas>
+                        </div>
+
+                        <div class="space-y-2.5 text-xs">
+                            <div class="p-2.5 rounded-xl border border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-full bg-blue-900"></div>
+                                    <span class="font-medium text-slate-700 dark:text-slate-300">Principal & Interest</span>
+                                </div>
+                                <span class="font-bold text-slate-900 dark:text-white" id="calcPI">$1,701 /mo</span>
+                            </div>
+
+                            <div class="p-2.5 rounded-xl border border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                                    <span class="font-medium text-slate-700 dark:text-slate-300">Est. Property Taxes</span>
+                                </div>
+                                <span class="font-bold text-slate-900 dark:text-white" id="calcTaxes">$298 /mo</span>
+                            </div>
+
+                            <div class="p-2.5 rounded-xl border border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                                    <span class="font-medium text-slate-700 dark:text-slate-300">Est. Homeowners Insurance</span>
+                                </div>
+                                <span class="font-bold text-slate-900 dark:text-white" id="calcInsurance">$145 /mo</span>
+                            </div>
+
+                            <div class="p-2.5 rounded-xl border border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-full bg-purple-600"></div>
+                                    <span class="font-medium text-slate-700 dark:text-slate-300">HOA & Other Fees</span>
+                                </div>
+                                <span class="font-bold text-slate-900 dark:text-white" id="calcHOA">$58 /mo</span>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Property Quick Specs Grid -->
-                    <div class="grid grid-cols-3 gap-3 mb-6">
-                        <div class="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl text-center border border-slate-100 dark:border-slate-700/50">
-                            <div class="text-lg font-bold text-slate-800 dark:text-slate-200">3</div>
-                            <div class="text-xs text-slate-500 dark:text-slate-400">Beds</div>
-                        </div>
-                        <div class="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl text-center border border-slate-100 dark:border-slate-700/50">
-                            <div class="text-lg font-bold text-slate-800 dark:text-slate-200">2</div>
-                            <div class="text-xs text-slate-500 dark:text-slate-400">Baths</div>
-                        </div>
-                        <div class="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl text-center border border-slate-100 dark:border-slate-700/50">
-                            <div class="text-lg font-bold text-slate-800 dark:text-slate-200">1,139</div>
-                            <div class="text-xs text-slate-500 dark:text-slate-400">Sqft</div>
-                        </div>
-                    </div>
-
-                    <!-- Property Highlights List -->
-                    <div class="grid grid-cols-2 gap-3 text-xs text-slate-600 dark:text-slate-300 mb-6">
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-900/30">
-                            <i class="fa-solid fa-house text-blue-500"></i> Single Family Residence
-                        </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-900/30">
-                            <i class="fa-solid fa-calendar-days text-blue-500"></i> Built in 2002
-                        </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-900/30">
-                            <i class="fa-solid fa-ruler-combined text-blue-500"></i> 8,712 Sqft Lot
-                        </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-900/30">
-                            <i class="fa-solid fa-dollar-sign text-blue-500"></i> $255 / sqft
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Planned Down Payment Control Box -->
-                <div class="p-4 rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-950/20">
-                    <div class="flex justify-between items-center mb-2">
-                        <label for="dpSlider" class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
-                            Planned Down Payment
-                        </label>
-                        <span class="text-sm font-bold text-blue-600 dark:text-blue-400" id="dpValueDisplay">$30,000 (10.35%)</span>
-                    </div>
-                    <input id="dpSlider" type="range" min="10000" max="60000" step="1000" value="30000" 
-                           oninput="updateDownPayment(this.value)"
-                           class="w-full h-2 bg-blue-200 dark:bg-blue-900 rounded-lg appearance-none cursor-pointer accent-blue-600">
-                    <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-                        <span>$10,000</span>
-                        <span>$30,000 (Target)</span>
-                        <span>$60,000</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECTION 3: CASH REMAINING / NET EQUITY BALANCE -->
-            <div class="lg:col-span-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm p-6 flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="px-2.5 py-1 rounded-md bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-xs font-bold">Step 3</span>
-                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Cash Remaining After Purchase</h2>
-                    </div>
-
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">
-                        Calculates remaining liquid funds after rolling net sale proceeds into down payment & estimated closing costs.
-                    </p>
-
-                    <!-- Flow Calculation Waterfall -->
-                    <div class="space-y-3 text-sm">
-                        
-                        <!-- Proceeds -->
-                        <div class="flex justify-between items-center p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200 font-medium">
-                            <span class="flex items-center gap-2">
-                                <i class="fa-solid fa-plus-circle text-emerald-500"></i> Net Proceeds from Sale
-                            </span>
-                            <span class="font-bold text-emerald-600 dark:text-emerald-400" id="flow-net-proceeds">+$59,625</span>
-                        </div>
-
-                        <!-- Down Payment -->
-                        <div class="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300">
-                            <span class="flex items-center gap-2">
-                                <i class="fa-solid fa-minus-circle text-red-400"></i> Planned Down Payment
-                            </span>
-                            <span class="font-bold text-red-500" id="flow-downpayment">-$30,000</span>
-                        </div>
-
-                        <!-- Subtotal Liquid Cash -->
-                        <div class="flex justify-between items-center p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 font-bold border border-blue-200 dark:border-blue-900/40">
-                            <span>Cash Left (Before Closing Costs)</span>
-                            <span class="text-blue-600 dark:text-blue-400" id="flow-cash-before-closing">$29,625</span>
-                        </div>
-
-                        <!-- New Closing Costs -->
-                        <div class="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300">
-                            <span class="flex items-center gap-2">
-                                <i class="fa-solid fa-minus-circle text-amber-500"></i> Est. New Closing Costs
-                            </span>
-                            <span class="font-bold text-slate-700 dark:text-slate-300">-$10,100</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Final Liquid Cash Result Card -->
-                <div class="mt-6 p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-md">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Net Liquid Reserve Left</span>
-                        <i class="fa-solid fa-wallet text-slate-400"></i>
-                    </div>
-                    <div class="text-3xl font-black text-emerald-400" id="final-liquid-cash">$19,525</div>
-                    <p class="text-[11px] text-slate-400 mt-2">
-                        *If $10,100 closing costs paid out of pocket/proceeds. Without deducting closing costs upfront: <strong class="text-slate-200" id="raw-cash-remaining">$29,625</strong>.
-                    </p>
-                </div>
             </div>
 
         </div>
 
-        <!-- SECTION 4: ESTIMATED MONTHLY PAYMENT BREAKDOWN (IMG_4821.PNG) -->
-        <section class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden">
-            <div class="border-b border-slate-100 dark:border-slate-700/60 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/50">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-1 rounded-md bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-xs font-bold">Step 4</span>
-                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Estimated Monthly Payment Breakdown</h2>
-                    </div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                        Based on Zillow BuyAbility™ estimate for Vero Beach Home ($289,900 purchase price)
-                    </p>
-                </div>
-
-                <div class="text-right">
-                    <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Total Estimated Payment</div>
-                    <div class="text-3xl font-black text-blue-600 dark:text-blue-400">$2,297 <span class="text-sm font-normal text-slate-500 dark:text-slate-400">/mo</span></div>
-                </div>
-            </div>
-
-            <div class="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
-                
-                <!-- Payment Visual Stack & Items -->
-                <div class="lg:col-span-7 space-y-6">
-                    
-                    <!-- Multi-color Stacked Progress Bar matching screenshot -->
-                    <div>
-                        <div class="flex justify-between text-xs font-semibold text-slate-500 mb-2">
-                            <span>Payment Distribution Stack</span>
-                            <span>$2,297 Total</span>
-                        </div>
-                        <div class="w-full h-4 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden flex">
-                            <!-- Principal & Interest: ~78.2% -->
-                            <div class="bg-blue-900 h-full" style="width: 78.2%" title="Principal & Interest ($1,796)"></div>
-                            <!-- Property Taxes: ~13% -->
-                            <div class="bg-blue-500 h-full" style="width: 13%" title="Est. Property Taxes ($298)"></div>
-                            <!-- Home Insurance: ~6.3% -->
-                            <div class="bg-amber-500 h-full" style="width: 6.3%" title="Est. Home Insurance ($145)"></div>
-                            <!-- HOA / Other: ~2.5% -->
-                            <div class="bg-purple-600 h-full" style="width: 2.5%" title="HOA & Fees ($58)"></div>
-                        </div>
-                    </div>
-
-                    <!-- Payment Components List -->
-                    <div class="space-y-3">
-                        
-                        <!-- Item 1: Principal & Interest -->
-                        <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center bg-white dark:bg-slate-800">
-                            <div class="flex items-center gap-3">
-                                <div class="w-3.5 h-3.5 rounded-full bg-blue-900"></div>
-                                <div>
-                                    <div class="font-bold text-slate-900 dark:text-white">Principal & Interest</div>
-                                    <div class="text-xs text-slate-500 dark:text-slate-400">Loan Amount: $259,900 ($289,900 - $30k Down)</div>
-                                </div>
-                            </div>
-                            <div class="text-lg font-bold text-slate-900 dark:text-white">$1,796 <span class="text-xs text-slate-400 font-normal">/mo</span></div>
-                        </div>
-
-                        <!-- Item 2: Property Taxes -->
-                        <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center bg-white dark:bg-slate-800">
-                            <div class="flex items-center gap-3">
-                                <div class="w-3.5 h-3.5 rounded-full bg-blue-500"></div>
-                                <div>
-                                    <div class="font-bold text-slate-900 dark:text-white">Property Taxes</div>
-                                    <div class="text-xs text-slate-500 dark:text-slate-400">Estimated Indian River County property tax</div>
-                                </div>
-                            </div>
-                            <div class="text-lg font-bold text-slate-900 dark:text-white">$298 <span class="text-xs text-slate-400 font-normal">/mo</span></div>
-                        </div>
-
-                        <!-- Item 3: Home Insurance -->
-                        <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center bg-white dark:bg-slate-800">
-                            <div class="flex items-center gap-3">
-                                <div class="w-3.5 h-3.5 rounded-full bg-amber-500"></div>
-                                <div>
-                                    <div class="font-bold text-slate-900 dark:text-white">Homeowners Insurance</div>
-                                    <div class="text-xs text-slate-500 dark:text-slate-400">Estimated FL hazard & wind insurance</div>
-                                </div>
-                            </div>
-                            <div class="text-lg font-bold text-slate-900 dark:text-white">$145 <span class="text-xs text-slate-400 font-normal">/mo</span></div>
-                        </div>
-
-                        <!-- Item 4: HOA / PMI -->
-                        <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center bg-white dark:bg-slate-800">
-                            <div class="flex items-center gap-3">
-                                <div class="w-3.5 h-3.5 rounded-full bg-purple-600"></div>
-                                <div>
-                                    <div class="font-bold text-slate-900 dark:text-white">HOA & Other Fees</div>
-                                    <div class="text-xs text-slate-500 dark:text-slate-400">Screenshot lists HOA: $0 / Standard buffer</div>
-                                </div>
-                            </div>
-                            <div class="text-lg font-bold text-slate-900 dark:text-white">$58 <span class="text-xs text-slate-400 font-normal">/mo</span></div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- Right Payment Breakdown Chart & BuyAbility Summary -->
-                <div class="lg:col-span-5 flex flex-col justify-between bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700">
-                    <div>
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Payment Breakdown Visual</h3>
-                        <div class="relative h-48 w-full mb-4">
-                            <canvas id="paymentChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- BuyAbility Box -->
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Zillow Home Loans™ Summary</span>
-                            <span class="text-[10px] text-slate-400">NMLS #10287</span>
-                        </div>
-                        <div class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
-                            <div class="flex justify-between">
-                                <span>Home Price:</span>
-                                <span class="font-semibold text-slate-900 dark:text-white">$289,900</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Down Payment:</span>
-                                <span class="font-semibold text-slate-900 dark:text-white">$30,000 (10.35%)</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Est. Closing Costs:</span>
-                                <span class="font-semibold text-slate-900 dark:text-white">$10,100</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- Footer Callout -->
+        <!-- Footer -->
         <footer class="text-center text-xs text-slate-400 py-6 border-t border-slate-200 dark:border-slate-800">
-            Report generated based on home sale estimates ($455k listing) and Zillow BuyAbility™ Vero Beach calculation.
+            Dynamic Relocation Financial Dashboard • All figures update dynamically in real time
         </footer>
 
     </main>
 
-    <!-- JavaScript Calculations & Charts Logic -->
     <script>
-        // State variables
-        let currentMortgage = 363000; // default user actual
-        let currentDownPayment = 30000;
-        const sellingPrice = 455000;
-        const sellingCosts = 32375; // 7.12%
-        const veroPrice = 289900;
-        const veroClosingCosts = 10100;
-
+        // Charts variables
         let saleChart, paymentChart;
 
-        // Initialize on load
         window.onload = function() {
-            initSaleChart();
-            initPaymentChart();
-            recalculate();
+            initCharts();
+            recalculateAll();
         };
 
-        // Dark mode toggle
         function toggleDarkMode() {
             document.documentElement.classList.toggle('dark');
             const icon = document.getElementById('theme-icon');
@@ -598,76 +411,154 @@
             }
         }
 
-        // Toggle mortgage mode
-        function setMortgageMode(amount) {
-            currentMortgage = amount;
+        function setMortgage(val) {
+            document.getElementById('inputMortgage').value = val;
+            recalculateAll();
+        }
+
+        function resetDefaults() {
+            document.getElementById('inputSellingPrice').value = 455000;
+            document.getElementById('inputMortgage').value = 360000;
+            document.getElementById('rateCommission').value = 3.96;
+            document.getElementById('rateConcessions').value = 1.00;
+            document.getElementById('costPrep').value = 2000;
+            document.getElementById('costMoving').value = 1000;
+            document.getElementById('inputPurchasePrice').value = 289900;
+            document.getElementById('inputDownPayment').value = 30000;
+            document.getElementById('sliderDownPayment').value = 30000;
+            document.getElementById('inputInterestRate').value = 6.85;
+            document.getElementById('inputClosingCosts').value = 10100;
+            recalculateAll();
+        }
+
+        function syncDpFromSlider() {
+            const val = document.getElementById('sliderDownPayment').value;
+            document.getElementById('inputDownPayment').value = val;
+            recalculateAll();
+        }
+
+        function syncDpFromInput() {
+            const val = document.getElementById('inputDownPayment').value;
+            document.getElementById('sliderDownPayment').value = val;
+            recalculateAll();
+        }
+
+        function formatCurrency(val) {
+            return '$' + Math.round(val).toLocaleString();
+        }
+
+        // Standard 30-year fixed loan principal & interest formula
+        function calculatePI(principal, annualRatePct, years = 30) {
+            if (principal <= 0) return 0;
+            const r = (annualRatePct / 100) / 12;
+            const n = years * 12;
+            if (r === 0) return principal / n;
+            return principal * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+        }
+
+        function recalculateAll() {
+            // Fetch inputs
+            const sellingPrice = parseFloat(document.getElementById('inputSellingPrice').value) || 0;
+            const mortgage = parseFloat(document.getElementById('inputMortgage').value) || 0;
             
-            const btn360 = document.getElementById('btn-360k');
-            const btn363 = document.getElementById('btn-363k');
+            const rateCommission = parseFloat(document.getElementById('rateCommission').value) || 0;
+            const rateConcessions = parseFloat(document.getElementById('rateConcessions').value) || 0;
+            const costPrep = parseFloat(document.getElementById('costPrep').value) || 0;
+            const costMoving = parseFloat(document.getElementById('costMoving').value) || 0;
 
-            if (amount === 360000) {
-                btn360.className = "px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400 font-semibold transition-all";
-                btn363.className = "px-3 py-1.5 rounded-lg transition-all text-slate-600 dark:text-slate-300";
-                document.getElementById('mortgage-tag').innerText = "Screenshot Baseline";
-            } else {
-                btn363.className = "px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400 font-semibold transition-all";
-                btn360.className = "px-3 py-1.5 rounded-lg transition-all text-slate-600 dark:text-slate-300";
-                document.getElementById('mortgage-tag').innerText = "Actual";
-            }
+            const purchasePrice = parseFloat(document.getElementById('inputPurchasePrice').value) || 0;
+            const downPayment = parseFloat(document.getElementById('inputDownPayment').value) || 0;
+            const interestRate = parseFloat(document.getElementById('inputInterestRate').value) || 0;
+            const closingCosts = parseFloat(document.getElementById('inputClosingCosts').value) || 0;
 
-            recalculate();
-        }
+            // 1. Selling Costs Breakdown (Closing fees 0.5%, Taxes 1.0% included in standard closing rates)
+            const commissionAmount = sellingPrice * (rateCommission / 100);
+            const concessionsAmount = sellingPrice * (rateConcessions / 100);
+            const standardClosingFees = sellingPrice * 0.005; // 0.50%
+            const standardTaxes = sellingPrice * 0.01;        // 1.00%
+            
+            const totalSellingCosts = commissionAmount + concessionsAmount + standardClosingFees + standardTaxes + costPrep + costMoving;
+            const totalSellingCostsPct = sellingPrice > 0 ? ((totalSellingCosts / sellingPrice) * 100).toFixed(2) : 0;
 
-        // Slider listener
-        function updateDownPayment(val) {
-            currentDownPayment = parseFloat(val);
-            const pct = ((currentDownPayment / veroPrice) * 100).toFixed(2);
-            document.getElementById('dpValueDisplay').innerText = `$${currentDownPayment.toLocaleString()} (${pct}%)`;
-            document.getElementById('kpi-downpayment').innerText = `$${currentDownPayment.toLocaleString()} (${pct}%)`;
-            document.getElementById('flow-downpayment').innerText = `-$${currentDownPayment.toLocaleString()}`;
-            recalculate();
-        }
+            const netProceeds = sellingPrice - mortgage - totalSellingCosts;
 
-        // Main recalculation logic
-        function recalculate() {
-            // Net Proceeds
-            const netProceeds = sellingPrice - currentMortgage - sellingCosts;
+            // 2. New Purchase Cash Flow Calculations
+            const dpPercent = purchasePrice > 0 ? ((downPayment / purchasePrice) * 100).toFixed(2) : 0;
+            const loanAmount = Math.max(0, purchasePrice - downPayment);
+            
+            const cashBeforeClosing = netProceeds - downPayment;
+            const finalCashReserve = cashBeforeClosing - closingCosts;
 
-            // Liquid Cash Remaining
-            const cashBeforeClosing = netProceeds - currentDownPayment;
-            const finalLiquidCash = cashBeforeClosing - veroClosingCosts;
+            // 3. Monthly Payment Auto-Calculation
+            const monthlyPI = calculatePI(loanAmount, interestRate, 30);
+            
+            // Scaled taxes/insurance buffer based on purchase price (approx ratios from Vero Beach listing baseline)
+            const monthlyTaxes = (purchasePrice * 0.0123) / 12; // ~1.23% annual tax rate
+            const monthlyInsurance = 145; 
+            const monthlyHOA = 58;
 
-            // Update UI Elements
-            document.getElementById('display-mortgage-owed').innerText = `$${currentMortgage.toLocaleString()}`;
-            document.getElementById('summary-mortgage').innerText = `-$${currentMortgage.toLocaleString()}`;
-            document.getElementById('summary-net-proceeds').innerText = `$${netProceeds.toLocaleString()}`;
-            document.getElementById('kpi-net-proceeds').innerText = `$${netProceeds.toLocaleString()}`;
-            document.getElementById('flow-net-proceeds').innerText = `+$${netProceeds.toLocaleString()}`;
-            document.getElementById('proceeds-badge').innerText = `Mortgage: $${currentMortgage.toLocaleString()}`;
+            const totalMonthly = monthlyPI + monthlyTaxes + monthlyInsurance + monthlyHOA;
 
-            document.getElementById('kpi-net-remaining').innerText = `$${cashBeforeClosing.toLocaleString()}`;
-            document.getElementById('flow-cash-before-closing').innerText = `$${cashBeforeClosing.toLocaleString()}`;
-            document.getElementById('final-liquid-cash').innerText = `$${finalLiquidCash.toLocaleString()}`;
-            document.getElementById('raw-cash-remaining').innerText = `$${cashBeforeClosing.toLocaleString()}`;
+            // Update KPI Banner
+            document.getElementById('kpi-sale-price').innerText = formatCurrency(sellingPrice);
+            document.getElementById('kpi-selling-costs').innerText = formatCurrency(totalSellingCosts);
+            document.getElementById('kpi-net-proceeds').innerText = formatCurrency(netProceeds);
+            document.getElementById('kpi-mortgage-display').innerText = formatCurrency(mortgage);
+            document.getElementById('kpi-purchase-price').innerText = formatCurrency(purchasePrice);
+            document.getElementById('kpi-dp-display').innerText = `${formatCurrency(downPayment)} (${dpPercent}%)`;
+            document.getElementById('kpi-monthly-payment').innerHTML = `${formatCurrency(totalMonthly)} <span class="text-xs font-normal opacity-80">/mo</span>`;
+            document.getElementById('kpi-net-cash-display').innerText = formatCurrency(finalCashReserve);
 
-            // Update Sale Chart
+            // Update Input Labels
+            document.getElementById('totalSellingCostRate').innerText = `${totalSellingCostsPct}% Total`;
+            document.getElementById('dpPercentDisplay').innerText = `${dpPercent}%`;
+
+            // Update Sale Breakdown Table
+            document.getElementById('calcSalePrice').innerText = formatCurrency(sellingPrice);
+            document.getElementById('calcMortgage').innerText = `-${formatCurrency(mortgage)}`;
+            document.getElementById('calcSellingCosts').innerText = `-${formatCurrency(totalSellingCosts)}`;
+            document.getElementById('calcNetProceeds').innerText = formatCurrency(netProceeds);
+
+            // Update Cash Flow Waterfall
+            document.getElementById('flowProceeds').innerText = `+${formatCurrency(netProceeds)}`;
+            document.getElementById('flowDp').innerText = `-${formatCurrency(downPayment)}`;
+            document.getElementById('flowCashBeforeClosing').innerText = formatCurrency(cashBeforeClosing);
+            document.getElementById('flowClosingCosts').innerText = `-${formatCurrency(closingCosts)}`;
+            document.getElementById('flowFinalReserve').innerText = formatCurrency(finalCashReserve);
+
+            // Update Monthly Payment Items
+            document.getElementById('calcTotalMonthly').innerText = formatCurrency(totalMonthly);
+            document.getElementById('calcPI').innerText = `${formatCurrency(monthlyPI)} /mo`;
+            document.getElementById('calcTaxes').innerText = `${formatCurrency(monthlyTaxes)} /mo`;
+            document.getElementById('calcInsurance').innerText = `${formatCurrency(monthlyInsurance)} /mo`;
+            document.getElementById('calcHOA').innerText = `${formatCurrency(monthlyHOA)} /mo`;
+
+            // Update Charts
             if (saleChart) {
-                saleChart.data.datasets[0].data = [netProceeds, currentMortgage, sellingCosts];
+                saleChart.data.datasets[0].data = [Math.max(0, netProceeds), mortgage, totalSellingCosts];
                 saleChart.update();
             }
+
+            if (paymentChart) {
+                paymentChart.data.datasets[0].data = [
+                    Math.round(monthlyPI),
+                    Math.round(monthlyTaxes),
+                    Math.round(monthlyInsurance),
+                    Math.round(monthlyHOA)
+                ];
+                paymentChart.update();
+            }
         }
 
-        // Initialize Net Proceeds Doughnut Chart
-        function initSaleChart() {
-            const ctx = document.getElementById('saleChart').getContext('2d');
-            const netProceeds = sellingPrice - currentMortgage - sellingCosts;
-
-            saleChart = new Chart(ctx, {
+        function initCharts() {
+            // Sale Proceeds Chart
+            const ctxSale = document.getElementById('saleChart').getContext('2d');
+            saleChart = new Chart(ctxSale, {
                 type: 'doughnut',
                 data: {
                     labels: ['Net Proceeds', 'Mortgage Owed', 'Selling Costs'],
                     datasets: [{
-                        data: [netProceeds, currentMortgage, sellingCosts],
+                        data: [59625, 360000, 35375],
                         backgroundColor: ['#10b981', '#64748b', '#ef4444'],
                         borderWidth: 0
                     }]
@@ -675,27 +566,19 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { boxWidth: 12, font: { size: 11 } }
-                        }
-                    },
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
                     cutout: '70%'
                 }
             });
-        }
 
-        // Initialize Payment Breakdown Doughnut Chart
-        function initPaymentChart() {
-            const ctx = document.getElementById('paymentChart').getContext('2d');
-
-            paymentChart = new Chart(ctx, {
+            // Payment Chart
+            const ctxPayment = document.getElementById('paymentChart').getContext('2d');
+            paymentChart = new Chart(ctxPayment, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Principal & Interest', 'Property Taxes', 'Home Insurance', 'HOA / Other'],
+                    labels: ['P & I', 'Taxes', 'Insurance', 'HOA / Other'],
                     datasets: [{
-                        data: [1796, 298, 145, 58],
+                        data: [1701, 298, 145, 58],
                         backgroundColor: ['#1e3a8a', '#3b82f6', '#f59e0b', '#9333ea'],
                         borderWidth: 0
                     }]
@@ -703,12 +586,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { boxWidth: 12, font: { size: 11 } }
-                        }
-                    },
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
                     cutout: '65%'
                 }
             });
