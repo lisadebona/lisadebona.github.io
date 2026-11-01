@@ -88,6 +88,33 @@
         .pulse-bg {
             animation: pulse-glow 4s infinite ease-in-out;
         }
+
+        .raffle-branding {
+          display: flex;
+          justify-content: center;
+          position: relative;
+          margin-top: -20px;
+        }
+        .raffle-branding .company-logo {
+          display: inline-block;
+          width: 130px;
+          height: 130px;
+          border-radius: 200px;
+          background: transparent;
+          position: relative;
+          filter: brightness(0) invert(1);
+        }
+        .raffle-branding .company-logo img {
+          display: block;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 75%;
+          height: 81%;
+          object-fit: cover;
+          object-position: center;
+          transform: translateX(-50%) translateY(-50%);
+        }
     </style>
 </head>
 <body class="p-4 md:p-8 flex flex-col min-h-screen relative selection:bg-amber-600 selection:text-white">
@@ -98,8 +125,13 @@
 
     <!-- Main Header -->
     <header class="text-center mb-6 z-10">
+        <div class="raffle-branding">
+          <a class="company-logo" href="#">
+            <img src="https://lisadebona.github.io/img/viking-arms-logo.png" alt="Viking Arms Gunworks" />
+          </a>
+        </div>
         <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-600">
-          GRAND RAFFLE DRAW
+          RAFFLE DRAW
         </h1>
         <p class="text-stone-400 text-sm md:text-base mt-2 max-w-lg mx-auto">
             Spin the 3D drum, pick winners in real-time, and celebrate with sound and confetti!
