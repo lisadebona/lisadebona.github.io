@@ -41,7 +41,7 @@ h1, h2, .callback-card h2, .stats strong {
   font-family: var(--display);
   font-weight: 700;
   letter-spacing: 0.01em;
-  line-height: 0.92;
+  line-height: 1.02;
   text-transform: uppercase;
 }
 
@@ -962,12 +962,29 @@ blockquote footer {
     background: transparent;
   }
 
-.nav-drop.open .dropdown { display: block; }
+  .nav-drop.open .dropdown { display: block; }
 
   .service-grid, .benefit-grid { grid-template-columns: 1fr 1fr; }
 
-  .hero { padding: 36px 0 72px; }
-  .stats { margin-top: 120px; }
+  .hero { 
+    padding: 36px 0 72px; 
+    background:
+    linear-gradient(180deg, rgba(28, 22, 82, 1) 0%, rgba(28, 22, 82, 0.88) 32%, rgba(5, 7, 8, 0.28) 58%, rgba(5, 7, 8, 0.18) 100%),
+    linear-gradient(180deg, rgba(5, 7, 8, 0.2), rgba(5, 7, 8, 0.35)),
+    url("../img/hero.jpg") center 68% / cover no-repeat;
+  }
+  .hero .hero-inner {
+    text-align: center;
+  }
+  .stats { 
+    margin-top: 120px;     
+    padding-bottom: 40px;
+    padding-top: 40px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
 
   .hero h1 { max-width: none; font-size: clamp(3.1rem, 14vw, 4.4rem); }
   .hero h1 .place { white-space: normal; }
@@ -986,6 +1003,27 @@ blockquote footer {
     color: var(--white);
     font-weight: 800;
     text-decoration: none;
+  }
+
+  .benefit-grid article {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .site-footer .footer-grid {
+    text-align: center;
+  }
+  .footer-logo {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
+  }
+  .footer-base {
+    text-align: center;
   }
 
   body { padding-bottom: 56px; }
