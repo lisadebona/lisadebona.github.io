@@ -407,7 +407,7 @@ input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible
 }
 
 .form-status {
-  min-height: 1.2em;
+  min-height: 1em;
   margin-top: 10px;
   color: var(--navy);
   font-size: 0.95rem;
@@ -699,6 +699,18 @@ blockquote footer {
 .contact-card a { color: var(--white); font-weight: 650; text-decoration: none; }
 
 .contact-card a:hover { text-decoration: underline; }
+
+.contact-featured-image {
+  margin: 0 0;
+  margin-top: 3rem;
+  overflow: hidden;
+  border-radius: 10px;
+  position: relative;
+}
+.contact-featured-image img {
+  width: 100%;
+  height: auto;
+}
 
 .contact-form { display: grid; gap: 12px; }
 
