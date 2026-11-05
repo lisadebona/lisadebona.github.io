@@ -1,0 +1,436 @@
+/**
+ * MySite Mail SMTP admin styles.
+ */
+
+.mysite-wrap {
+	max-width: 1240px;
+	margin-top: 20px;
+}
+
+.mysite-wrap [hidden] {
+	display: none !important;
+}
+
+.mysite-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 12px;
+	margin-bottom: 20px;
+	padding: 0 24px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.mysite-brand {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 16px 0;
+}
+
+.mysite-brand .dashicons {
+	width: 30px;
+	height: 30px;
+	font-size: 30px;
+	color: #2271b1;
+}
+
+.mysite-brand h1 {
+	margin: 0;
+	font-size: 20px;
+	line-height: 1.2;
+}
+
+.mysite-version {
+	color: #646970;
+	font-size: 12px;
+}
+
+.mysite-tabs {
+	display: flex;
+	align-self: stretch;
+	gap: 2px;
+	margin-left: auto;
+}
+
+.mysite-tabs a {
+	display: flex;
+	align-items: center;
+	padding: 0 16px;
+	color: #50575e;
+	font-weight: 500;
+	text-decoration: none;
+	border-bottom: 3px solid transparent;
+}
+
+.mysite-tabs a:hover,
+.mysite-tabs a:focus {
+	color: #2271b1;
+}
+
+.mysite-tabs a.is-active {
+	color: #2271b1;
+	border-bottom-color: #2271b1;
+}
+
+.mysite-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 300px;
+	gap: 20px;
+	align-items: start;
+}
+
+.mysite-main {
+	min-width: 0;
+}
+
+.mysite-card {
+	margin-bottom: 20px;
+	padding: 22px 24px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.mysite-card h2 {
+	margin: 0 0 6px;
+	font-size: 16px;
+	line-height: 1.4;
+}
+
+.mysite-card-desc {
+	margin: 0 0 18px;
+	color: #50575e;
+}
+
+.mysite-side-text {
+	color: #50575e;
+	font-size: 13px;
+}
+
+.mysite-side-text a {
+	text-decoration: none;
+}
+
+.mysite-mailers {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+	gap: 14px;
+}
+
+.mysite-mailer {
+	position: relative;
+	display: block;
+	cursor: pointer;
+}
+
+.mysite-mailer input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+}
+
+.mysite-mailer-box {
+	display: block;
+	height: 100%;
+	padding: 16px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mysite-mailer:hover .mysite-mailer-box {
+	border-color: #8c8f94;
+}
+
+.mysite-mailer.is-selected .mysite-mailer-box {
+	background: #f0f6fc;
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+.mysite-mailer input:focus-visible + .mysite-mailer-box {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+}
+
+.mysite-mailer-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.mysite-mailer-head .dashicons {
+	color: #2271b1;
+}
+
+.mysite-mailer-text {
+	display: block;
+	color: #50575e;
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.mysite-field {
+	display: grid;
+	grid-template-columns: 170px minmax(0, 1fr);
+	gap: 20px;
+	padding: 18px 0;
+	border-top: 1px solid #f0f0f1;
+}
+
+.mysite-field:first-of-type {
+	padding-top: 0;
+	border-top: 0;
+}
+
+.mysite-field > label,
+.mysite-field-label {
+	padding-top: 4px;
+	color: #1d2327;
+	font-weight: 600;
+}
+
+.mysite-field-control .description {
+	margin-top: 8px;
+}
+
+.mysite-field-control select {
+	max-width: 100%;
+	min-width: 200px;
+}
+
+.mysite-input-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.mysite-input-row input {
+	flex: 1 1 320px;
+}
+
+.mysite-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	margin-top: 10px;
+	cursor: pointer;
+	font-weight: 500;
+}
+
+.mysite-toggle input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+}
+
+.mysite-toggle-track {
+	position: relative;
+	flex: none;
+	width: 40px;
+	height: 22px;
+	background: #8c8f94;
+	border-radius: 999px;
+	transition: background-color 0.15s ease;
+}
+
+.mysite-toggle-track::after {
+	content: "";
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 16px;
+	height: 16px;
+	background: #fff;
+	border-radius: 50%;
+	transition: transform 0.15s ease;
+}
+
+.mysite-toggle input:checked + .mysite-toggle-track {
+	background: #2271b1;
+}
+
+.mysite-toggle input:checked + .mysite-toggle-track::after {
+	transform: translateX(18px);
+}
+
+.mysite-toggle input:focus-visible + .mysite-toggle-track {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+}
+
+.mysite-check {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 8px;
+	color: #50575e;
+	font-size: 13px;
+}
+
+.mysite-steps {
+	margin: 0 0 8px 18px;
+	color: #50575e;
+}
+
+.mysite-steps li {
+	margin-bottom: 6px;
+	list-style: decimal;
+}
+
+.mysite-inline-note {
+	display: inline-block;
+	margin: 0;
+	padding: 8px 12px;
+	color: #8a4b00;
+	background: #fcf9e8;
+	border-left: 4px solid #dba617;
+	border-radius: 2px;
+}
+
+.mysite-connected {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0 0 10px;
+	font-weight: 500;
+}
+
+.mysite-connected .dashicons {
+	color: #00a32a;
+}
+
+.mysite-google-btn.button {
+	background: #1a73e8;
+	border-color: #1a73e8;
+	color: #fff;
+	text-decoration: none;
+}
+
+.mysite-google-btn.button:hover,
+.mysite-google-btn.button:focus {
+	background: #1558b8;
+	border-color: #1558b8;
+	color: #fff;
+}
+
+.mysite-danger-btn.button {
+	color: #b32d2e;
+	border-color: #b32d2e;
+	text-decoration: none;
+}
+
+.mysite-danger-btn.button:hover,
+.mysite-danger-btn.button:focus {
+	background: #b32d2e;
+	border-color: #b32d2e;
+	color: #fff;
+}
+
+.mysite-footnote {
+	margin: 18px 0 0;
+	padding-top: 14px;
+	color: #646970;
+	font-size: 12px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.mysite-actions {
+	margin: 4px 0 20px;
+}
+
+.mysite-status {
+	margin: 0;
+}
+
+.mysite-status li {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	margin: 0;
+	padding: 10px 0;
+	border-top: 1px solid #f0f0f1;
+}
+
+.mysite-status li:first-child {
+	padding-top: 0;
+	border-top: 0;
+}
+
+.mysite-status span {
+	color: #646970;
+}
+
+.mysite-status strong {
+	text-align: right;
+	word-break: break-word;
+}
+
+.mysite-side .mysite-card {
+	padding: 18px 20px;
+}
+
+@media screen and (max-width: 1100px) {
+	.mysite-layout {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.mysite-side {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 20px;
+	}
+
+	.mysite-side .mysite-card {
+		margin-bottom: 0;
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.mysite-header {
+		padding: 0 16px;
+	}
+
+	.mysite-tabs {
+		width: 100%;
+		margin-left: 0;
+		border-top: 1px solid #f0f0f1;
+	}
+
+	.mysite-tabs a {
+		flex: 1;
+		justify-content: center;
+		padding: 12px 8px;
+	}
+
+	.mysite-card {
+		padding: 18px 16px;
+	}
+
+	.mysite-mailers,
+	.mysite-side {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.mysite-field {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 8px;
+	}
+
+	.mysite-field > label,
+	.mysite-field-label {
+		padding-top: 0;
+	}
+}
